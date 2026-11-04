@@ -1,0 +1,924 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#180605" />
+    <title>Pawnfall · 3D Combat</title>
+    <meta
+      name="description"
+      content="A third-person chess combat arena. Sword, shield, dodge, survive."
+    />
+    <link rel="stylesheet" href="style.css?v=34-first-blood" />
+  </head>
+  <body>
+    <div id="viewport" aria-label="3D combat arena"></div>
+    <div class="vignette"></div>
+    <div id="hitFlash"></div>
+    <div id="deathFX" hidden aria-hidden="true"></div>
+    <div id="victoryFX" hidden aria-hidden="true"></div>
+    <div id="boardCoordinates" aria-hidden="true">
+      <span>A B C D E F G H</span><i>8<br />7<br />6<br />5<br />4<br />3<br />2<br />1</i>
+    </div>
+    <header>
+      <a class="brand" data-ui-nav href="#" aria-label="Pawnfall home"
+        >♟ <span>PAWNFALL</span><small>3D COMBAT</small></a
+      >
+      <div class="topbuttons">
+        <button id="menu" data-ui-nav>MENU</button
+        ><button id="resetCamera" aria-label="Reset game camera">CAMERA ↺</button
+        ><button id="sound" aria-label="Toggle audio">SOUND OFF</button
+        ><button id="help" data-ui-nav>CONTROLS</button
+        ><button id="pause" data-ui-nav>PAUSE <kbd>ESC</kbd></button>
+      </div>
+    </header>
+    <div id="hud">
+      <div class="vitals">
+        <div class="crest">♟</div>
+        <div class="bars">
+          <div class="bar health"><i id="hpFill"></i><span id="hpText">100 / 100</span></div>
+          <div class="bar stamina"><i id="stFill"></i></div>
+          <div class="souls"><span>✧</span> <b id="souls">0</b><small>SOULS</small></div>
+        </div>
+      </div>
+      <div class="timer"><span>──── ◇</span> <b id="timer">00:00</b> <span>◇ ────</span></div>
+      <div class="encounter">
+        <small>TRIAL OF PROMOTION</small><b id="wave">I / V</b
+        ><span id="remaining">3 enemies remain</span>
+      </div>
+    </div>
+    <div id="announcement" role="status">
+      <small id="announceSmall">ENCOUNTER I</small>
+      <h2 id="announceTitle">The opening gambit</h2>
+    </div>
+    <div id="arenaNotice" role="status" hidden></div>
+    <div id="targetHud" hidden>
+      <small id="targetName">The Fallen Queen</small>
+      <div><i id="targetFill"></i></div>
+      <div class="targetPosture"><i id="targetPoise"></i></div>
+      <p id="championHint" hidden></p>
+    </div>
+    <section id="bossHud" hidden aria-label="Boss status">
+      <div class="bossTop">
+        <small id="bossSubtitle">SIEGE ENGINE OF THE ASHEN COURT</small
+        ><span id="bossPhase">PHASE I</span>
+      </div>
+      <h3 id="bossName">THE IRON CASTELLAN</h3>
+      <div class="bossHealth"><i id="bossHp"></i><span id="bossHpText"></span></div>
+      <div class="bossPosture"><i id="bossPoise"></i></div>
+      <p id="bossHint" aria-live="polite">BAIT THE CHARGE. PUNISH THE RECOVERY.</p>
+    </section>
+    <div id="weaponHud"></div>
+    <div id="abilityHud">
+      <b id="abilityName"></b><span id="abilityCooldown"></span>
+      <div><i id="abilityFill"></i></div>
+    </div>
+    <div id="reticle" hidden>◇</div>
+    <div class="equipment" role="group" aria-label="Combat controls">
+      <button
+        type="button"
+        class="equip"
+        data-action="ultimate"
+        aria-label="Piece ability"
+        title="Chess ability · Q"
+      >
+        ♛<kbd>Q</kbd></button
+      ><button
+        type="button"
+        class="equip shieldIcon"
+        data-action="guard"
+        aria-label="Guard (hold)"
+        aria-pressed="false"
+        title="Hold to guard · Right mouse"
+      >
+        ◈<kbd>RMB</kbd></button
+      ><button
+        type="button"
+        class="equip flask"
+        data-action="heal"
+        aria-label="Heal"
+        title="Heal · R"
+      >
+        <div class="bottle"><i></i></div>
+        <b id="flasks">3</b><kbd>R</kbd></button
+      ><button
+        type="button"
+        class="equip heavyIcon"
+        data-action="heavy"
+        aria-label="Heavy attack"
+        title="Heavy attack · E"
+      >
+        ⚒<kbd>E</kbd></button
+      ><button
+        type="button"
+        class="equip swordIcon"
+        data-action="attack"
+        aria-label="Attack"
+        title="Attack · Left mouse"
+      >
+        ⚔<kbd>LMB</kbd></button
+      ><button
+        type="button"
+        class="equip"
+        data-action="dodge"
+        aria-label="Dodge"
+        title="Dodge · Space"
+      >
+        ↝<kbd>SPACE</kbd></button
+      ><button
+        type="button"
+        class="equip"
+        data-action="lock"
+        aria-label="Lock on"
+        title="Lock on · Middle mouse"
+      >
+        ◎<kbd>MMB</kbd>
+      </button>
+    </div>
+    <div id="reconnectNotice" role="status" hidden></div>
+    <section id="tutorialPanel" hidden aria-label="Playable combat tutorial">
+      <small id="tutorialCount"></small>
+      <h3 id="tutorialTitle"></h3>
+      <p id="tutorialText" role="status"></p>
+      <b id="tutorialKeys"></b>
+      <div class="tutorialTrack"><i id="tutorialFill"></i></div>
+      <div class="tutorialActions">
+        <button id="finishTutorial" class="primary" hidden>ENTER CAMPAIGN</button
+        ><button id="exitTutorial" data-ui-nav class="outlineBtn">EXIT TUTORIAL</button>
+      </div>
+    </section>
+    <div id="status" aria-live="polite"></div>
+    <div id="combatCoach" role="status"></div>
+    <div id="objectiveStack">
+      <div id="objectiveHud"></div>
+      <section id="arenaGoal" hidden aria-label="Arena objective">
+        <small>ARENA GOAL</small>
+        <h3 id="arenaGoalTitle"></h3>
+        <p id="arenaGoalDetail" role="status"></p>
+        <div class="goalTrack"><i id="arenaGoalFill"></i></div>
+      </section>
+    </div>
+    <button
+      id="objectiveInteract"
+      data-action="revive"
+      hidden
+      aria-label="Hold to break a ritual sigil"
+    >
+      HOLD · INTERACT
+    </button>
+    <div id="practiceHud" hidden></div>
+    <div id="teamHud" hidden role="status"></div>
+    <div id="threatHud" aria-live="off"></div>
+    <div class="bottomHint" id="bottomHint">
+      <span><kbd>WASD</kbd> Move</span><span><kbd>LMB</kbd> Attack</span
+      ><span><kbd>RMB</kbd> Guard</span><span><kbd>SPACE</kbd> Dodge</span
+      ><span><kbd>MMB</kbd> Lock on</span
+      ><span class="cameraHint">MMB drag to orbit · Scroll to zoom</span>
+    </div>
+    <div id="overlay">
+      <div class="deathDarkness" aria-hidden="true"></div>
+      <div class="hub">
+        <nav class="menuToolbar" aria-label="Menu navigation">
+          <button id="navBack" data-ui-nav type="button">← BACK</button
+          ><button id="navHome" data-ui-nav type="button">⌂ HOME</button
+          ><button id="saveQuit" type="button" hidden>SAVE &amp; QUIT</button
+          ><span id="navLocation">Campaign</span
+          ><button id="navResume" data-ui-nav type="button" hidden>RESUME RUN →</button>
+        </nav>
+        <nav class="hubNav" aria-label="Game sections">
+          <button data-tab="campaign" class="active">CAMPAIGN</button
+          ><button data-tab="multiplayer">MULTIPLAYER</button
+          ><button data-tab="armory">ARMORY</button>
+          <details id="moreMenu" class="moreMenu">
+            <summary id="moreMenuToggle">MORE</summary>
+            <div class="moreMenuItems">
+              <button data-tab="training">TRAINING</button
+              ><button data-tab="bestiary">BESTIARY</button><button data-tab="honors">HONORS</button
+              ><button data-tab="settings">SETTINGS</button>
+            </div>
+          </details>
+          <span id="profileTitle">Wanderer</span>
+        </nav>
+        <div id="hubContent">
+          <div id="runOutcome" hidden>
+            <section id="runChronicle" hidden aria-label="Run chronicle">
+              <small>YOUR PATH THROUGH THE COURT</small>
+              <h3 id="chronicleResult"></h3>
+              <div id="chronicleStats" class="resultMetrics"></div>
+              <div id="chronicleBuild" class="resultBuild"></div>
+              <details class="journeyDetails">
+                <summary>Journey details</summary>
+                <div id="chronicleDetails"></div>
+              </details>
+              <pre id="chronicleText" hidden></pre>
+              <div class="chronicleActions">
+                <button id="copyChronicle" class="outlineBtn">COPY SUMMARY</button
+                ><button id="saveChronicle" class="outlineBtn">SHARE / SAVE CARD</button>
+              </div>
+              <p id="chronicleFeedback" role="status"></p>
+            </section>
+            <section id="deathRecap" hidden aria-label="Death recap">
+              <div>
+                <small>WHAT ENDED THE RUN</small>
+                <h3 id="recapCause"></h3>
+                <p id="recapDamage"></p>
+                <p id="recapTip"></p>
+                <details class="recentHits">
+                  <summary>Recent damage</summary>
+                  <p id="recapRecent" class="subtle"></p>
+                </details>
+              </div>
+              <button id="retryFight" class="primary">QUICK RETRY</button>
+            </section>
+          </div>
+          <section id="panel-campaign" class="hubPanel">
+            <div class="intro">
+              <small id="overline">FOUR REALMS. ONE UNBROKEN SOUL.</small>
+              <h1 id="title">Claim your<br /><em>kingdom.</em></h1>
+              <p id="description">
+                Twenty encounters across four fallen realms.<br />Survive the court. Earn your
+                crown.
+              </p>
+              <div id="chapters" class="chapterGrid"></div>
+              <div class="runSetup">
+                <div class="difficultyControl">
+                  <label for="soloDifficulty">COMBAT DIFFICULTY</label
+                  ><select id="soloDifficulty">
+                    <option value="pilgrim">Pilgrim · learn the court</option>
+                    <option value="standard" selected>Standard · fight for every opening</option>
+                    <option value="veteran">Veteran · relentless squads</option>
+                    <option value="nightmare">Nightmare · no easy openings</option>
+                  </select>
+                  <p id="difficultyHint"></p>
+                </div>
+              </div>
+              <div class="campaignActions">
+                <button id="start" class="primary" disabled>FORGING THE ARENA…</button
+                ><button id="newRun" data-ui-nav type="button" class="outlineBtn" hidden>
+                  START NEW RUN</button
+                ><button id="continueRun" type="button" class="outlineBtn" hidden>
+                  CONTINUE SAVED RUN</button
+                ><button id="resumeCheckpoint" class="outlineBtn" disabled>
+                  CONTINUE CHECKPOINT</button
+                ><button id="startTutorial" type="button" class="outlineBtn">
+                  LEARN COMBAT · PLAY TUTORIAL</button
+                ><button id="learn" class="textButton">Learn to survive ↗</button>
+              </div>
+              <div class="campaignSecondary">
+                <details id="advancedRun" class="menuDisclosure">
+                  <summary>Run rules <span>Modifiers &amp; checkpoint settings</span></summary>
+                  <div class="disclosureBody">
+                    <div class="difficultyControl">
+                      <label for="runModifier">OPTIONAL RUN MODIFIER · SOLO</label
+                      ><select id="runModifier">
+                        <option value="none">Standard rules</option>
+                      </select>
+                    </div>
+                    <div class="difficultyControl">
+                      <label for="checkpointMode">RETRY RULE</label
+                      ><select id="checkpointMode">
+                        <option value="encounter">
+                          Encounter checkpoints · retry the current fight
+                        </option>
+                        <option value="fullrun">
+                          Full-run challenge · restart from encounter one
+                        </option>
+                      </select>
+                    </div>
+                    <p id="checkpointNotice" class="subtle"></p>
+                  </div>
+                </details>
+                <details id="challengeMenu" class="menuDisclosure">
+                  <summary>Challenge modes <span>Boss trials &amp; Endless Solo</span></summary>
+                  <div class="challengeActions disclosureBody">
+                    <button id="endlessRun" class="outlineBtn">∞ ENDLESS SOLO</button>
+                    <div id="endlessRecords" aria-label="Endless records by difficulty"></div>
+                    <p id="endlessLegacy" class="subtle"></p>
+                    <p class="endlessModeNote">
+                      Infinite encounters, escalating enemies, a new realm every five fights. Save
+                      &amp; Quit keeps your run.
+                    </p>
+                    <button id="bossChallenge" class="outlineBtn">CHALLENGE THE CASTELLAN</button
+                    ><button id="confessorChallenge" class="outlineBtn">
+                      CHALLENGE THE CONFESSOR</button
+                    ><button id="kingChallenge" class="outlineBtn">CHALLENGE THE FALLEN KING</button
+                    ><button id="bossRush" type="button" class="outlineBtn">
+                      BOSS RUSH · THREE CROWNS
+                    </button>
+                  </div>
+                </details>
+              </div>
+            </div>
+          </section>
+          <section id="panel-multiplayer" class="hubPanel" hidden>
+            <section id="matchResult" hidden role="status" aria-live="polite">
+              <small id="matchResultLabel">DUEL COMPLETE</small>
+              <h2 id="matchResultTitle"></h2>
+              <p id="matchWinner"></p>
+              <div id="matchStats" class="resultMetrics" hidden></div>
+              <p id="matchResultDetail"></p>
+            </section>
+            <small class="sectionEyebrow">THE BOARD HAS ROOM FOR TWO</small>
+            <h2>Fight beside a friend.<br /><em>Or face a worthy rival.</em></h2>
+            <section id="sessionPanel" hidden>
+              <small>YOUR MATCH</small>
+              <h3 id="sessionStatus"></h3>
+              <p id="sessionPlayers"></p>
+              <p id="seriesScore"></p>
+              <div class="sessionActions">
+                <button id="readyMatch" class="primary">READY</button
+                ><button id="rematchMatch" class="primary" hidden>REQUEST REMATCH</button
+                ><button id="leaveSession" class="outlineBtn">LEAVE ROOM</button>
+              </div>
+              <p id="sessionDetail"></p>
+            </section>
+            <button id="rejoinCoop" class="primary" hidden>REJOIN CO-OP</button>
+            <p id="lobbyConnection" class="subtle" role="status"></p>
+            <div class="matchPreferences">
+              <div class="fieldGroup">
+                <label class="titleSelect"
+                  >CO-OP DIFFICULTY
+                  <select id="coopDifficulty">
+                    <option value="pilgrim">Pilgrim</option>
+                    <option value="standard" selected>Standard</option>
+                    <option value="veteran">Veteran</option>
+                    <option value="nightmare">Nightmare</option>
+                  </select></label
+                >
+              </div>
+              <div class="fieldGroup">
+                <label class="titleSelect"
+                  >VERSUS FORMAT
+                  <select id="versusFormat">
+                    <option value="3">Best of three · first to 2 wins</option>
+                    <option value="1">Single duel</option>
+                  </select></label
+                >
+              </div>
+            </div>
+            <p class="subtle matchPreferenceNote">
+              Public co-op pairs the same difficulty. Private rooms use the host’s choice.
+            </p>
+            <div class="modeGrid">
+              <button class="modeCard active" data-mode="coop">
+                <span>♟ ♟</span><b>Co-op expedition</b>
+                <p>
+                  Two pawns. One fallen court. Clear six encounters together, ending with the Fallen
+                  King. Fifteen-minute expedition limit. Hold Revive near a fallen ally for three
+                  seconds before their 30-second timer expires. Clearing an encounter also restores
+                  fallen allies.
+                </p>
+                <small>2 PLAYERS · SHARED ENEMIES</small></button
+              ><button class="modeCard" data-mode="versus">
+                <span>⚔</span><b>Versus duel</b>
+                <p>
+                  Equal equipment, no stat bonuses. Outplay another pawn with steel, stamina, and
+                  timing. Five-minute limit.
+                </p>
+                <small>1 VS 1 · CASUAL MATCHMAKING</small>
+              </button>
+            </div>
+            <div class="matchControls">
+              <label
+                >YOUR NAME<input
+                  id="displayName"
+                  maxlength="24"
+                  placeholder="Wanderer"
+                  autocomplete="off" /></label
+              ><button id="findMatch" class="primary">FIND A MATCH</button
+              ><button id="privateMatch" class="outlineBtn">CREATE PRIVATE ROOM</button>
+            </div>
+            <div class="joinControls">
+              <input
+                id="roomCode"
+                aria-label="Room code"
+                maxlength="6"
+                placeholder="ROOM CODE"
+              /><button id="joinMatch" class="outlineBtn">JOIN ROOM</button>
+            </div>
+            <div id="queueState" hidden>
+              <span class="spinner"></span>
+              <div>
+                <b id="queueTitle">Finding your opponent…</b>
+                <p id="queueDetail">Waiting for another player in this mode.</p>
+                <strong id="queueCode"></strong>
+              </div>
+              <button id="cancelMatch" class="outlineBtn">CANCEL</button>
+            </div>
+            <p id="networkNotice" class="subtle" role="status">
+              Matchmaking connects players with access to this site. Room codes let friends choose
+              each other.
+            </p>
+          </section>
+          <section id="panel-armory" class="hubPanel" hidden>
+            <div class="runOptions">
+              <label
+                >CURSED RELIC · OPTIONAL<select id="curseSelect"></select
+                ><small id="curseDetail"></small></label
+              ><label
+                >CO-OP ROLE<select id="roleSelect"></select
+                ><small id="roleDetail"></small
+              ></label>
+            </div>
+            <small class="sectionEyebrow">EARNED IN BATTLE. WORN WITH PRIDE.</small>
+            <h2>The armory</h2>
+            <p class="subtle">Choose your weapon. Earn cosmetics through combat.</p>
+            <div class="loadoutGrid">
+              <div class="fieldGroup">
+                <label class="titleSelect"
+                  >CHESS PIECE
+                  <select id="pieceSelect"></select
+                ></label>
+                <p id="pieceDetail" class="subtle"></p>
+              </div>
+              <div class="fieldGroup">
+                <label class="titleSelect"
+                  >WEAPON
+                  <select id="weaponSelect" aria-label="Starting weapon"></select
+                ></label>
+                <p id="weaponDetail" class="subtle"></p>
+              </div>
+            </div>
+            <p class="subtle">
+              Choose before entering solo or multiplayer. Run upgrades reset each run and are
+              disabled in versus.
+            </p>
+            <div class="fieldGroup relicField">
+              <label class="titleSelect"
+                >BOSS RELIC
+                <select id="relicSelect">
+                  <option value="none">No relic</option>
+                </select></label
+              >
+              <p id="relicDetail" class="subtle"></p>
+              <p class="subtle">
+                Defeat the Castellan or Confessor to unlock their relic. Choose one before solo or
+                co-op; relics are disabled in versus.
+              </p>
+            </div>
+            <div id="skins" class="skinGrid"></div>
+            <label class="titleSelect"
+              >YOUR TITLE
+              <select id="titleSelect"></select
+            ></label>
+          </section>
+          <section id="panel-training" class="hubPanel" hidden>
+            <small class="sectionEyebrow">MAKE EVERY MISTAKE HERE FIRST</small>
+            <h2>The sparring court</h2>
+            <p class="subtle">
+              Practice without losing progress. Health cannot fall below 1, enemies reset, and this
+              arena grants no souls or honors.
+            </p>
+            <div class="settingsGrid">
+              <label
+                >OPPONENT<select id="trainingEnemy">
+                  <option value="pawn">Pawn · pressure</option>
+                  <option value="knight">Knight · leap</option>
+                  <option value="bishop">Bishop · ranged control</option>
+                  <option value="rook">Rook · armored guard</option>
+                  <option value="queen">Queen · three-strike chain</option>
+                  <option value="king">King · close combat</option>
+                </select></label
+              ><label
+                >EXERCISE<select id="trainingBehavior">
+                  <option value="attack">Sparring · attack, parry and evade</option>
+                  <option value="dummy">Passive · practice combos and abilities</option>
+                  <option value="guard">Guard · flank or break posture</option>
+                </select></label
+              ><label class="checkSetting"
+                ><input id="trainingUnlimited" type="checkbox" checked />Unlimited stamina and
+                flasks</label
+              >
+            </div>
+            <p class="subtle">
+              Choose your piece and weapon in Armory. Uses the campaign difficulty selected before
+              entry.
+            </p>
+            <button id="trainingTutorial" class="outlineBtn">
+              PLAY GUIDED TUTORIAL · INCLUDING PARRY</button
+            ><button id="startTraining" class="primary">ENTER TRAINING</button>
+          </section>
+          <section id="panel-settings" class="hubPanel" hidden>
+            <small class="sectionEyebrow">YOUR COURT. YOUR CONTROLS.</small>
+            <h2>Settings</h2>
+            <div class="settingsSection">
+              <h3>Audio</h3>
+              <div class="audioCueSettings">
+                <label><input id="combatCues" type="checkbox" /> Combat warning cues</label
+                ><label
+                  ><input id="directionalAudio" type="checkbox" /> Directional combat sound</label
+                ><button id="previewCombatAudio" type="button" class="outlineBtn">
+                  PREVIEW COMBAT CUES
+                </button>
+                <p id="combatAudioNotice" class="subtle" role="status">
+                  Rising windups, sharp projectile warnings, broken-guard tones and a clear parry
+                  chime. Volume follows Combat Effects.
+                </p>
+              </div>
+              <div class="settingsGrid audioSettings">
+                <label
+                  >MASTER VOLUME<input
+                    id="setting-master"
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.05" /></label
+                ><label
+                  >COMBAT EFFECTS<input
+                    id="setting-sfx"
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.05" /></label
+                ><label
+                  >ARENA AMBIENCE<input
+                    id="setting-ambience"
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.05"
+                /></label>
+              </div>
+            </div>
+            <div class="settingsSection">
+              <h3>Display &amp; camera</h3>
+              <div class="settingsGrid">
+                <label
+                  >GRAPHICS MODE<select id="qualityMode">
+                    <option value="auto">Automatic · tune for this device</option>
+                    <option value="manual">Manual · choose your preset</option>
+                  </select></label
+                ><label
+                  >GRAPHICS<select id="setting-quality">
+                    <option value="low">Low · lighter particles, no shadows</option>
+                    <option value="medium">Medium · balanced</option>
+                    <option value="high">High · sharper rendering</option>
+                  </select></label
+                ><label
+                  >CAMERA SENSITIVITY<input
+                    id="setting-sensitivity"
+                    type="range"
+                    min="0.4"
+                    max="2"
+                    step="0.1" /></label
+                ><label class="checkSetting"
+                  ><input id="setting-reducedEffects" type="checkbox" />Reduced flashes, particles
+                  and camera effects</label
+                >
+              </div>
+            </div>
+            <p id="performanceNotice" class="subtle" role="status"></p>
+            <button id="retuneGraphics" class="outlineBtn">RECHECK PERFORMANCE</button>
+            <div class="settingsSection mobileSettings">
+              <h3>Mobile combat controls</h3>
+              <p class="subtle">
+                Drag controls in the preview to reposition them. Portrait and landscape layouts save
+                separately. Changes apply to the touch HUD without affecting keyboard or controller
+                bindings.
+              </p>
+              <div class="settingsGrid">
+                <label
+                  >TOUCH CONTROLS<select id="touchMode">
+                    <option value="auto">Automatic</option>
+                    <option value="on">Always show</option>
+                    <option value="off">Hide touch controls</option>
+                  </select></label
+                ><label
+                  >EDIT LAYOUT<select id="mobilePreviewOrientation">
+                    <option value="landscape">Landscape</option>
+                    <option value="portrait">Portrait</option>
+                  </select></label
+                ><label
+                  >BUTTON SIZE<input
+                    id="touchScale"
+                    type="range"
+                    min="0.85"
+                    max="1.35"
+                    step="0.05" /></label
+                ><label
+                  >BUTTON OPACITY<input
+                    id="touchOpacity"
+                    type="range"
+                    min="0.35"
+                    max="1"
+                    step="0.05" /></label
+                ><label class="checkSetting"
+                  ><input id="touchLeftHanded" type="checkbox" />Left-handed layout</label
+                ><label class="checkSetting"
+                  ><input id="touchLockAssist" type="checkbox" />Touch attack lock-on assist</label
+                ><label class="checkSetting"
+                  ><input id="mobilePerformance" type="checkbox" />Mobile performance mode (lower
+                  resolution and no shadows)</label
+                >
+              </div>
+              <div
+                id="mobilePreview"
+                role="group"
+                aria-label="Drag to arrange mobile controls"
+              ></div>
+              <p id="mobileLayoutNotice" class="subtle" role="status">
+                Drag a control, then release to save. Arrow keys also move a focused control.
+                Controls stay inside the screen and separate when space is limited.
+              </p>
+              <button id="resetMobileLayout" data-ui-nav type="button" class="outlineBtn">
+                RESET MOBILE LAYOUT
+              </button>
+            </div>
+            <div class="settingsSection">
+              <p id="controllerStatus" class="subtle"></p>
+              <p class="subtle">
+                Gamepad: left stick move, right stick camera, RB attack, RT heavy, LB guard, B roll,
+                X heal, Y ability, R3 or LT lock, L3 sprint, A hold-revive, D-pad up ping, Start
+                pause. In menus, D-pad or left stick navigates, A selects, and B returns. Left/right
+                adjusts a focused slider.
+              </p>
+              <h3>Mouse &amp; keyboard bindings</h3>
+              <p class="subtle">
+                Default controls: WASD move, Q ability, E heavy attack, R heal, F revive, Space
+                roll, Shift sprint. Left mouse attacks, right mouse guards, middle-click locks on,
+                and middle-drag orbits the camera. Mouse button 4 pings; the on-screen Ping button
+                also works. Select a binding, then press a key or mouse button. Escape cancels; P
+                and Escape always pause. Mouse and touch controls stay available.
+              </p>
+              <div id="keyBindings" class="bindingGrid"></div>
+              <p id="bindingNotice" class="subtle" role="status"></p>
+              <button id="resetBindings" class="outlineBtn">RESTORE DEFAULT CONTROLS</button>
+            </div>
+          </section>
+          <section id="panel-bestiary" class="hubPanel" hidden>
+            <small class="sectionEyebrow">KNOW THE PIECE. READ THE THREAT.</small>
+            <h2>The court’s bestiary</h2>
+            <p class="subtle">
+              Meet enemies in solo or co-op to uncover their moves and counters. Sparring and rival
+              players do not unlock entries.
+            </p>
+            <div class="bestiaryTools">
+              <label
+                >SEARCH ENCOUNTERED ENEMIES<input
+                  id="bestiarySearch"
+                  type="search"
+                  maxlength="80"
+                  placeholder="Name, attack, or counter" /></label
+              ><label
+                >SHOW<select id="bestiaryFilter">
+                  <option value="all">All enemies</option>
+                  <option value="soldiers">Soldiers</option>
+                  <option value="champions">Champions &amp; rival</option>
+                  <option value="bosses">Bosses</option>
+                </select></label
+              ><button id="clearBestiaryFilter" class="outlineBtn" type="button">
+                CLEAR FILTERS
+              </button>
+            </div>
+            <p id="bestiaryCount" class="subtle"></p>
+            <div class="bestiaryLayout">
+              <div>
+                <div id="bestiaryGrid"></div>
+                <p id="bestiaryEmpty" hidden>
+                  No entries match. Clear the filters to see the full court.
+                </p>
+              </div>
+              <article id="bestiaryDetail" tabindex="-1" hidden>
+                <button id="closeBestiaryDetail" data-ui-nav type="button" class="outlineBtn">
+                  ← BACK TO ENTRIES
+                </button>
+                <h3 id="bestiaryName"></h3>
+                <h4>ATTACK PATTERN</h4>
+                <p id="bestiaryAttacks"></p>
+                <h4>HOW TO COUNTER</h4>
+                <p id="bestiaryCounter"></p>
+              </article>
+            </div>
+          </section>
+          <section id="panel-honors" class="hubPanel" hidden>
+            <small class="sectionEyebrow">EVERY SCAR TELLS A STORY</small>
+            <h2>Honors of the fallen court <span id="honorCount"></span></h2>
+            <p id="syncStatus" class="subtle">
+              Progress is saved on this device. Connect to sync it to your account.
+            </p>
+            <div id="careerStats" class="careerStats"></div>
+            <div id="honors" class="honorGrid"></div>
+          </section>
+        </div>
+      </div>
+      <div class="version">PAWNFALL<br />STEEL IN MOTION</div>
+    </div>
+    <section
+      id="upgradePanel"
+      hidden
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="upgradeTitle"
+    >
+      <div class="upgradeInner">
+        <nav class="popupToolbar" aria-label="Encounter navigation">
+          <button id="intermissionMenu" data-ui-nav type="button">BACK TO MENU</button
+          ><span>Your choices wait here.</span>
+        </nav>
+        <small>A BREATH BETWEEN BATTLES</small>
+        <h2 id="upgradeTitle">Forge your next move.</h2>
+        <p id="upgradeNote">Choose one blessing. It lasts for this run.</p>
+        <div id="upgradeCards"></div>
+        <p id="runBuild"></p>
+      </div>
+    </section>
+    <dialog id="guide">
+      <nav class="guideToolbar" aria-label="Help navigation">
+        <button id="closeHelp" data-ui-nav type="button" aria-label="Close controls">← BACK</button
+        ><button id="guideHome" data-ui-nav type="button">HOME</button>
+      </nav>
+      <small>THE ART OF SURVIVAL</small>
+      <h2>Steel. Stamina. Timing.</h2>
+      <p>
+        This is a third-person action arena. Move freely, face your enemy, and fight at sword range.
+        There are no turns or tile-based controls. The guide’s prose uses default keys; the bindings
+        below reflect your saved settings.
+      </p>
+      <p>
+        The Bestiary tab records enemies encountered in solo or co-op and explains their moves and
+        counters. Combat warning cues and directional audio can be toggled in Settings. Mobile
+        controls have separate portrait/landscape layouts: drag buttons in the Settings preview,
+        adjust size and opacity, or mirror the layout. Touch attack lock-on assist and a mobile
+        performance mode are optional. Revive and ritual interaction share the HOLD USE touch
+        button.
+      </p>
+      <p>
+        Select your chess piece in the armory. Press Q for its special ability: pawn diagonal
+        capture, knight L-vault, bishop diagonals, rook file charge, queen eight-way strike, or king
+        Castling Ward. Each costs 35 stamina and has a cooldown. Enemy special attacks have a
+        longer, marked windup.
+      </p>
+      <div class="controlList">
+        <div><kbd>W A S D</kbd><span>Move relative to the camera</span></div>
+        <div><kbd>LEFT MOUSE</kbd><span>Attack · chain three sword swings</span></div>
+        <div>
+          <kbd>RIGHT MOUSE</kbd><span>Hold to guard · tap just before impact to parry</span>
+        </div>
+        <div><kbd>SPACE</kbd><span>Dodge in your movement direction</span></div>
+        <div><kbd>SHIFT</kbd><span>Hold to sprint</span></div>
+        <div><kbd>MIDDLE MOUSE</kbd><span>Lock onto the nearest enemy</span></div>
+        <div><kbd>R</kbd><span>Drink a healing flask · three per run</span></div>
+        <div><kbd>MMB DRAG / SCROLL</kbd><span>Orbit the camera / adjust distance</span></div>
+      </div>
+      <p>
+        Watch for <strong>orange windups</strong>, then dodge the impact or face the attack and
+        guard. Bishops cast projectiles, knights leap, rooks charge and slam, and the queen
+        unleashes a wide sweep. Attacking and guarding consume stamina. It regenerates when you
+        rest.
+      </p>
+      <p>
+        The Ashen Board ends with the Iron Castellan. Leave its marked charge lane, punish the
+        exposed core, and break its posture for a longer opening. Phase II adds double hammer slams
+        and cross-board attacks. The boss challenge lets you face it immediately without granting a
+        campaign clear. Clear five campaign encounters to earn promotion. Cleared encounters restore
+        vitality according to the selected difficulty.
+      </p>
+      <p>
+        Choose a longsword, rapier, or warhammer in the armory. Press E or use Heavy for a
+        weapon-specific strike: longsword sweep, retreating rapier thrust, or a charged hammer slam.
+        Heavy attacks cost more stamina, bypass enemy frontal guards, and leave a longer recovery. A
+        fresh guard within 0.18 seconds of impact performs a perfect parry and empowers your next
+        attack for 1.8 seconds. Holding guard remains a normal block. Release guard for at least
+        0.25 seconds before attempting another parry. Between encounters, choose one blessing; co-op
+        waits for both players. Versus uses unmodified weapons.
+      </p>
+      <p>
+        Guarded enemies take reduced frontal damage: flank them, finish a three-hit combo, use a
+        warhammer, or earn a riposte. Gold-marked elites are tougher. Standard begins with a guarded
+        pawn, a flanker and a knight. Enemies close in faster while you drink a flask; create
+        distance before healing. Holding guard slows stamina recovery, and Standard restores only 10
+        vitality between encounters; Pilgrim starts with three pawns. Realm-colored floor markings
+        warn of arena strikes; leave before they turn red. The garden targets a root circle, the
+        cathedral uses narrow frost lanes, and the eclipse court strikes diagonally. Queens chain
+        three attacks, so wait for the full recovery. In co-op, hold your Revive binding near an
+        ally and use Ping to mark your position.
+      </p>
+      <p>
+        Solo checkpoints save the start of each encounter, including your build, health, flasks,
+        position and ability cooldown. Continue from the campaign menu or retry after death.
+        Full-run challenge restarts at encounter one. Boss relics unlock in Armory. In co-op, break
+        posture and have your partner land a heavy attack during the opening for a team finisher
+        with +40 base damage.
+      </p>
+      <p>
+        The Eclipse Court ends with the Fallen King. His royal edicts command and replace a limited
+        number of guards. At half vitality, he sacrifices surviving guards and gains new attacks
+        before fighting alone. Leave the marked cross lanes, dodge both sword sweeps, then punish
+        his exposed crown. Co-op expeditions now have six encounters, ending with the Castellan,
+        Confessor and Fallen King.
+      </p>
+      <p>
+        Ser Veyr retreats from the first cavalry encounter and returns scarred in solo encounter IV.
+        He adapts to light attacks, heavy attacks or frequent guarding. His red second-leap tell
+        breaks guard: dodge it. In co-op he returns alongside the Castellan. Between fights, bargain
+        for supplies, challenge an extra wounded knight for souls, or spend souls at the forge.
+        Continue is always free.
+      </p>
+      <p>
+        Spear thrusts have long reach and a narrow point. Twin blades trade reach and guard stamina
+        for fast wide cuts. The two-handed greatsword has sweeping light attacks and a committed
+        charged heavy. In co-op, fire a rook and bishop ability within 1.5 seconds so their lanes
+        cross for a 50-damage crossing explosion. A king ability paired with an ally ability within
+        five units and 1.5 seconds wards both allies for four seconds. Ordinary ability stamina and
+        cooldowns still apply.
+      </p>
+      <p>
+        Pawns earn one promotion after surviving encounter II. At the next intermission, become a
+        knight, bishop, rook or queen, or hold your pawn rank. Your equipped weapon and blessings
+        stay; the new piece ability is immediately ready. Other starting pieces keep their chosen
+        class. Co-op pauses until both players finish their choices.
+      </p>
+      <p>
+        Arena goals appear in regular encounters: hold an uncontested gold throne ring for eight
+        seconds, break three red ritual sigils by holding your Revive / Interact binding nearby for
+        two seconds each, or protect the wounded king for eighteen seconds. Moving, guarding or
+        taking damage interrupts a ritual channel; reviving a nearby ally takes priority. The king
+        can be attacked by enemies; if he falls, the encounter is lost. Finish the arena goal and
+        defeat the enemies to advance and claim 150 bonus souls per player. Killing all attackers
+        also secures a surviving king. Boss fights and sparring keep their own rules.
+      </p>
+      <p>
+        Each intermission asks for at most one choice: a passage, promotion, camp event or blessing.
+        Extra blessings are granted automatically. On your first passage, choose to recover at the
+        sanctuary, face a champion for 200 souls and an extra blessing at the next intermission, or
+        fight two additional knights for 150 souls and a flask. Clear the whole encounter to earn
+        its reward. Co-op requires matching route votes; either player can change their vote.
+        Champions have distinct counters: break the Iron Marshal’s guard to strip nearby allies’
+        wards, dodge both Red Huntmaster leaps, or evade both Ashen Cantor volleys before punishing
+        their longer recovery.
+      </p>
+      <p>
+        The Pale Cathedral ends with the Pale Confessor. Its doubles cast no shadows. Dodge crossed
+        bolts and punish the recovery; phase II fires a delayed second volley. Co-op expeditions
+        face the Castellan, Confessor, then the Fallen King.
+      </p>
+      <p>
+        Pause a solo run and choose Save &amp; Quit to keep the exact fight on this device. Optional
+        curses and co-op roles are in the armory. Boss Rush faces three bosses with only two flasks
+        and no free healing. Complete a combat bonus to reveal a secret gold arch; hold Interact
+        there to summon an optional Regent. Amber rings warn you for two seconds before arena gates
+        rise or a pillar falls. On phones, drag the open arena to orbit, pinch to zoom, and use
+        Camera ↺ to reset.
+      </p>
+      <button id="back" data-ui-nav class="primary">RETURN TO THE ARENA</button>
+    </dialog>
+    <div id="teamControls" hidden>
+      <button
+        data-action="revive"
+        type="button"
+        aria-label="Hold to revive ally"
+        aria-pressed="false"
+      >
+        HOLD REVIVE <kbd>F</kbd></button
+      ><button data-action="ping" type="button" aria-label="Ping your location">
+        PING <kbd>M4</kbd>
+      </button>
+    </div>
+    <div id="touch">
+      <div id="joystick"><i></i></div>
+      <div class="touchActions">
+        <button data-action="lock" aria-label="Lock on">◎</button
+        ><button data-action="heal" aria-label="Heal">✚</button
+        ><button data-action="ultimate" aria-label="Piece ability">Q</button
+        ><button data-action="heavy" aria-label="Heavy attack">HEAVY</button
+        ><button data-action="guard">GUARD</button><button data-action="dodge">DODGE</button
+        ><button data-action="attack" class="attack" aria-label="Attack">⚔</button
+        ><button
+          id="mobileRevive"
+          data-action="revive"
+          aria-label="Hold to interact or revive"
+          hidden
+        >
+          HOLD USE</button
+        ><button id="mobilePing" data-action="ping" aria-label="Ping your location" hidden>
+          PING
+        </button>
+      </div>
+    </div>
+    <div id="awardToast" role="status" hidden>
+      <span>✦</span>
+      <div>
+        <small>HONOR EARNED</small><b id="awardName"></b>
+        <p id="awardReward"></p>
+      </div>
+    </div>
+    <div id="networkHud" hidden><span id="networkQuality"></span><b id="duelScore"></b></div>
+    <div id="peerHud" hidden>
+      <small id="peerName">Ally</small>
+      <div><i id="peerHp"></i></div>
+      <span id="connectionState">ONLINE</span>
+    </div>
+    <div id="error" hidden>
+      <h2>The arena couldn’t load.</h2>
+      <p id="errorText">
+        This game requires WebGL. Try a browser with hardware acceleration enabled.
+      </p>
+      <button class="primary" onclick="location.reload()">TRY AGAIN</button>
+    </div>
+    <script
+      defer
+      src="game.js?v=34-first-blood"
+      onerror="document.querySelector('#error').hidden=false;document.querySelector('#errorText').textContent='The game file could not be loaded. Please check your connection and reload.'"
+    ></script>
+  </body>
+</html>

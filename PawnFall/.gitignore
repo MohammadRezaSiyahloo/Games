@@ -1,0 +1,12 @@
+/dist/
+/public/game.js
+/outputs/
+node_modules/
+.wrangler/
+.env*
+*.log
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+.DS_Store
+Thumbs.db

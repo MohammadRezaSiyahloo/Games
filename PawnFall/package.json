@@ -1,0 +1,21 @@
+{
+  "name": "pawnfall",
+  "version": "2.4.2",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "test": "node scripts/test.mjs",
+    "dev": "node scripts/dev.mjs",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "predev": "npm run build"
+  },
+  "description": "Real-time chess combat for the browser, with solo campaigns, endless encounters and multiplayer arenas.",
+  "devDependencies": {
+    "prettier": "3.6.2"
+  }
+}

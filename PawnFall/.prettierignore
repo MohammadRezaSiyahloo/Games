@@ -1,0 +1,7 @@
+dist/
+node_modules/
+outputs/
+public/game.js
+public/vendor/
+package-lock.json
+docs/images/
