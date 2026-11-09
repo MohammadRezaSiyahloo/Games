@@ -1,0 +1,15 @@
+import assert from 'node:assert/strict';
+import { NoticeGate } from '../src/client/hud-notices.mjs';
+const notices = new NoticeGate();
+assert(notices.accept('Encounter begins', 0, { priority: 2, duration: 2.6 }));
+assert(!notices.accept('Bonus souls', 0.2), 'minor rewards cannot cover encounter introductions');
+assert(notices.accept('Ally down', 0.3, { priority: 3 }), 'urgent warnings interrupt lower-priority notices');
+assert(!notices.accept('Parry', 0.4), 'combat feedback cannot replace urgent information');
+assert(!notices.accept('Ally down', 3), 'repeat events are deduplicated after the display expires');
+assert(notices.accept('Parry', 3), 'the lane becomes available without a stale message queue');
+assert(notices.accept('Ally down', 7, { priority: 3 }), 'important recurring events may show again');
+notices.reset();
+assert(notices.accept('Ally down', 0), 'a fresh run resets notice cooldowns');
+for (let i = 1; i < 100; i++) notices.accept('Notice ' + i, i * 10);
+assert(notices.recent.size <= 40, 'deduplication history stays bounded in endless play');
+console.log('PASS: one event lane, warning priority, duplicate suppression, no backlog and clean run reset.');

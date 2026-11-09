@@ -4861,3 +4861,1200 @@ body.menu #tutorialPanel {
     margin: 10px 0;
   }
 }
+#overlay {
+  background: linear-gradient(90deg, #090e16fa, #0e1520ee 38%, #101620b8 70%, #0c131b80);
+}
+.hub {
+  display: grid;
+  grid-template-columns: 190px minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
+  column-gap: clamp(32px, 5vw, 90px);
+  left: 5%;
+  right: 5%;
+  top: 106px;
+  bottom: max(35px, env(safe-area-inset-bottom));
+  max-width: 1440px;
+}
+.menuToolbar {
+  grid-column: 2;
+  grid-row: 1;
+  margin-bottom: 20px;
+  border: 0;
+}
+.hub.homeIdle .menuToolbar {
+  display: none;
+}
+.hubNav {
+  grid-column: 1;
+  grid-row: 1 / 3;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 5px;
+  margin: 0;
+  padding: 28px 24px 15px 0;
+  border: 0;
+  border-right: 1px solid #dfc28b24;
+}
+.hubNav .navEyebrow {
+  display: block;
+  margin: 0 0 30px 14px;
+  color: #a5afbd;
+  font: 10px/1.5 system-ui;
+  letter-spacing: 1.7px;
+}
+.hubNav > button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  text-align: left;
+  min-height: 50px;
+  padding: 13px 14px;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  color: #aab4c3;
+  font: 500 14px/1.4 system-ui;
+  letter-spacing: 0;
+}
+.hubNav > button span {
+  color: #8d99aa;
+  font: 10px system-ui;
+  margin: 0;
+}
+.hubNav > button.active {
+  color: #fff0d4;
+  background: linear-gradient(90deg, #d7b37320, #d7b37308);
+  border-color: #d7b37338;
+}
+.hubNav > button.active:after {
+  display: none;
+}
+.hubNav > button:hover {
+  background-color: #ffffff09;
+}
+.hubNav #profileTitle {
+  display: block;
+  margin: auto 0 0 14px;
+  padding-top: 32px;
+  color: #aab4c3;
+  font: italic 14px Georgia;
+}
+.moreMenu {
+  margin: 20px 0 0;
+}
+.moreMenu summary {
+  padding: 13px 14px;
+  color: #aab4c3;
+  font: 12px/1.5 system-ui;
+  letter-spacing: 0;
+}
+.moreMenuItems {
+  left: 0;
+  right: auto;
+  width: 210px;
+}
+#hubContent {
+  grid-column: 2;
+  grid-row: 2;
+  padding: 0 8px 25px 0;
+  scroll-behavior: smooth;
+}
+.hub.homeIdle #hubContent {
+  grid-row: 1 / 3;
+}
+.hub.homeIdle #panel-campaign {
+  min-height: 100%;
+  display: flex;
+  align-items: center;
+  padding: 32px 0;
+}
+.hub .intro {
+  width: 100%;
+  max-width: 860px;
+}
+.hub .intro > small {
+  font: 10px/1.8 system-ui;
+  letter-spacing: 2.6px;
+  color: #d4b780;
+}
+.hub .intro h1 {
+  font: 400 clamp(48px, 5.6vw, 88px)/1.02 Georgia, serif;
+  letter-spacing: -2.5px;
+  margin: 22px 0;
+  color: #f7f1e7;
+}
+.hub .intro h1 br {
+  display: block;
+}
+.hub .intro h1 em {
+  margin: 0;
+  color: #e7c58b;
+  font-weight: 400;
+}
+.hub .intro #description {
+  max-width: 430px;
+  color: #bcc5d0;
+  font: 15px/1.8 system-ui;
+  margin: 0 0 30px;
+}
+.campaignActions {
+  align-items: center;
+  gap: 22px;
+  margin: 0;
+}
+.campaignActions #start {
+  min-width: 250px;
+  min-height: 62px;
+  padding: 19px 30px;
+  font: 700 13px/1.6 system-ui;
+  letter-spacing: 2px;
+  background: linear-gradient(110deg, #dfbc7b, #f2dbad);
+  border: 1px solid #f2dbad;
+  color: #18202a;
+  border-radius: 4px;
+  box-shadow: 0 8px 36px #0003;
+}
+.campaignActions #start:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+}
+.campaignActions #startTutorial {
+  border: 0;
+  background: none;
+  color: #d4dce5;
+  font: 13px/1.5 system-ui;
+  padding: 12px 0;
+  text-transform: none;
+  letter-spacing: 0;
+  min-height: 44px;
+}
+.campaignActions #startTutorial:hover {
+  color: #f2dbad;
+}
+.hub .intro .playSummary {
+  font: 11px/1.7 system-ui;
+  color: #aab5c5;
+  margin: 13px 0 28px;
+  max-width: 540px;
+}
+.campaignSetup {
+  max-width: 800px;
+  border-color: #cfb78930;
+}
+.campaignSetup > summary {
+  font: 13px/1.7 system-ui;
+  padding: 17px 0;
+  color: #cbd3dd;
+}
+.campaignSetup > summary span {
+  color: #9ba8ba;
+  font-size: 11px;
+}
+.campaignSetup > .disclosureBody {
+  padding: 10px 0 25px;
+}
+.setupHeading {
+  color: #e5d2ae;
+  font: 20px Georgia;
+  margin: 20px 0 16px;
+}
+.campaignSetup .chapterGrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.campaignSetup .chapterCard {
+  min-height: 135px;
+}
+.campaignSetup .chapterCard p {
+  font-size: 12px;
+}
+.campaignSetup .campaignSecondary {
+  margin-top: 24px;
+}
+.campaignSetup .runSetup {
+  margin: 24px 0;
+}
+.campaignSetup #continueRun, .campaignSetup #resumeCheckpoint {
+  display: none;
+}
+.hubPanel .menuDisclosure {
+  margin-top: 12px;
+}
+.hubPanel > .menuDisclosure > summary {
+  font-family: system-ui;
+  font-size: 14px;
+}
+#panel-multiplayer, #panel-armory, #panel-settings, #panel-training, #panel-honors {
+  max-width: 950px;
+}
+.modeCard {
+  min-height: 0;
+}
+.modeCard p {
+  max-width: 320px;
+}
+.matchOptions {
+  margin-bottom: 20px;
+}
+.privateRooms {
+  margin-top: 24px;
+}
+#panel-armory .runOptions {
+  margin-top: 10px;
+}
+.settingsSection.mobileSettings {
+  padding: 0;
+}
+body.menu #help, body.menu .brand small {
+  display: none;
+}
+.run-result #campaignSetup, .run-result #playSummary {
+  display: none;
+}
+.run-result .hub .intro h1 {
+  font-size: 48px;
+}
+@media (prefers-reduced-motion: reduce) {
+  #hubContent {
+    scroll-behavior: auto;
+  }
+  .campaignActions #start:hover {
+    transform: none;
+  }
+}
+@media (max-width: 900px) {
+  .hub {
+    grid-template-columns: 150px minmax(0, 1fr);
+    column-gap: 30px;
+  }
+  .hubNav {
+    padding-right: 16px;
+  }
+  .hubNav .navEyebrow {
+    font-size: 8px;
+    letter-spacing: 1px;
+    margin-left: 10px;
+  }
+  .hubNav > button {
+    padding-left: 10px;
+  }
+  .hub .intro h1 {
+    font-size: 58px;
+  }
+  .campaignActions {
+    gap: 14px;
+  }
+  .campaignActions #start {
+    min-width: 210px;
+  }
+  .campaignSetup > summary span {
+    display: none;
+  }
+}
+@media (max-width: 650px) {
+  .hub {
+    display: flex;
+    flex-direction: column;
+    top: 84px;
+    left: 6%;
+    right: 6%;
+    bottom: max(18px, env(safe-area-inset-bottom));
+    gap: 0;
+  }
+  .hubNav {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 0 0 10px;
+    margin: 0 0 22px;
+    border-right: 0;
+    border-bottom: 1px solid #dfc28b24;
+    align-items: center;
+  }
+  .hubNav .navEyebrow, .hubNav #profileTitle, .hubNav > button span {
+    display: none;
+  }
+  .hubNav > button {
+    width: auto;
+    flex: 1;
+    min-height: 44px;
+    padding: 10px 8px;
+    justify-content: center;
+    font-size: 12px;
+  }
+  .moreMenu {
+    margin: 0;
+    flex-basis: 100%;
+  }
+  .moreMenu summary {
+    width: fit-content;
+    padding: 10px 8px 2px;
+    font-size: 11px;
+  }
+  .moreMenuItems {
+    width: min(240px, 80vw);
+  }
+  .menuToolbar {
+    order: 1;
+    margin: 0 0 12px;
+  }
+  .hubNav {
+    order: 0;
+  }
+  #hubContent {
+    order: 2;
+    flex: 1;
+    padding-right: 4px;
+  }
+  .hub.homeIdle #panel-campaign {
+    align-items: flex-start;
+    padding: 16px 0;
+  }
+  .hub .intro h1 {
+    font-size: clamp(45px, 12vw, 66px);
+    letter-spacing: -1.5px;
+    margin: 18px 0;
+  }
+  .hub .intro #description {
+    font-size: 13px;
+    margin-bottom: 24px;
+  }
+  .hub .intro > small {
+    font-size: 8px;
+    letter-spacing: 1.6px;
+  }
+  .campaignActions {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 5px 20px;
+  }
+  .campaignActions #start {
+    width: auto;
+    flex: 1;
+    min-width: 170px;
+    min-height: 56px;
+    padding: 16px 20px;
+  }
+  .campaignActions #startTutorial {
+    width: auto;
+  }
+  .hub .intro .playSummary {
+    font-size: 10px;
+    margin-bottom: 20px;
+  }
+  .campaignSetup .chapterGrid {
+    gap: 8px;
+  }
+  .campaignSetup .chapterCard {
+    padding: 13px;
+  }
+  .campaignSetup .chapterCard b {
+    font-size: 14px;
+  }
+  .menuDisclosure summary span {
+    font-size: 10px;
+  }
+  .run-result .campaignActions #start {
+    width: 100%;
+  }
+}
+@media (max-height: 550px) and (min-width: 651px) {
+  .hub {
+    top: 80px;
+    bottom: 15px;
+  }
+  .hub.homeIdle #panel-campaign {
+    align-items: flex-start;
+    padding-top: 5px;
+  }
+  .hub .intro h1 {
+    font-size: 46px;
+    margin: 12px 0;
+  }
+  .hub .intro #description {
+    margin-bottom: 16px;
+    font-size: 13px;
+  }
+}
+
+/* Shared menu rhythm and alignment. */
+:root {
+  --menu-gap: 24px;
+  --hud-edge: max(20px, env(safe-area-inset-left), env(safe-area-inset-right));
+}
+body.menu header {
+  left: max(5%, calc((100% - 1440px) / 2));
+  right: max(5%, calc((100% - 1440px) / 2));
+}
+.hub {
+  --panel-width: 860px;
+}
+.hubNav {
+  gap: 8px;
+  padding-top: 24px;
+}
+.hubNav .navEyebrow {
+  margin-bottom: 24px;
+}
+.hubNav > button {
+  min-height: 48px;
+}
+.hubNav > button span {
+  min-width: 18px;
+  text-align: right;
+}
+.hubNav .moreMenu summary {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+}
+.moreMenu summary:after {
+  margin-left: auto;
+}
+#hubContent {
+  padding: 0 8px 24px 0;
+}
+#hubContent .hubPanel {
+  width: 100%;
+  max-width: var(--panel-width);
+  padding: 0 0 24px;
+  min-width: 0;
+}
+.hub .intro, .campaignSetup, .campaignSecondary, .runSetup {
+  max-width: var(--panel-width);
+}
+.hub.homeIdle #panel-campaign {
+  padding: 24px 0;
+}
+.hub .intro h1 {
+  margin: 24px 0;
+}
+.hub .intro #description {
+  margin-bottom: 32px;
+}
+.campaignActions {
+  margin: 0;
+  gap: 24px;
+}
+.campaignActions .primary {
+  margin: 0;
+}
+.campaignActions #start, .campaignActions #startTutorial {
+  min-height: 60px;
+}
+.campaignActions #start:hover {
+  transform: none;
+}
+.hub .intro .playSummary {
+  margin: 12px 0 24px;
+}
+.hubPanel .menuDisclosure {
+  margin-top: 16px;
+}
+.menuDisclosure > summary {
+  min-height: 56px;
+  gap: 16px;
+  padding: 16px 0;
+}
+.menuDisclosure > summary > span {
+  text-align: right;
+  line-height: 1.5;
+}
+.menuDisclosure > summary:after {
+  flex: 0 0 16px;
+  text-align: center;
+}
+.menuDisclosure > .disclosureBody {
+  padding: 8px 0 24px;
+}
+.hubPanel h2 {
+  margin: 12px 0 24px;
+}
+.setupHeading {
+  margin: 24px 0 16px;
+}
+.loadoutGrid, .matchPreferences, .runOptions, .settingsGrid {
+  width: 100%;
+  max-width: none;
+  gap: 24px;
+}
+.loadoutGrid, .matchPreferences {
+  margin: 24px 0;
+  align-items: start;
+}
+.titleSelect, .difficultyControl {
+  max-width: none;
+}
+.hubPanel label {
+  min-width: 0;
+}
+.hubPanel .customSelect, .hubPanel .selectTrigger {
+  width: 100%;
+  min-width: 0;
+}
+.hubPanel .selectTrigger, .hubPanel input:not([type='range']):not([type='checkbox']), .hubPanel select {
+  min-height: 48px;
+}
+.hubPanel .selectTrigger {
+  display: flex;
+  align-items: center;
+  text-align: left;
+}
+.hubPanel .fieldGroup p, .hubPanel .runOptions small {
+  min-height: 0;
+  line-height: 1.65;
+}
+.modeGrid {
+  gap: 16px;
+  align-items: stretch;
+  margin: 24px 0;
+}
+.modeCard {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  gap: 12px;
+  padding: 24px;
+}
+.modeCard > span, .modeCard > b, .modeCard > p, .modeCard > small {
+  margin: 0;
+}
+.modeCard > p {
+  flex: 1;
+  max-width: none;
+  line-height: 1.7;
+}
+.modeCard > small {
+  margin-top: 4px;
+}
+.chapterCard {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  gap: 10px;
+  padding: 20px;
+}
+.chapterCard > small, .chapterCard > span, .chapterCard > b, .chapterCard > p, .chapterCard > i {
+  margin: 0;
+}
+.chapterCard > p {
+  flex: 1;
+}
+.chapterCard > i {
+  padding-top: 4px;
+}
+.matchControls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(190px, 240px);
+  gap: 16px;
+  align-items: end;
+  margin: 24px 0;
+}
+.matchControls label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.matchControls input {
+  width: 100%;
+  margin: 0;
+}
+.matchControls .primary, .joinControls .outlineBtn {
+  min-height: 48px;
+  margin: 0;
+}
+.joinControls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(140px, 200px);
+  align-items: stretch;
+  gap: 16px;
+  max-width: 580px;
+  margin-top: 16px;
+}
+.joinControls input {
+  width: 100%;
+  min-width: 0;
+}
+.settingsSection {
+  margin: 0 0 24px;
+}
+.settingsSection h3 {
+  margin: 0 0 16px;
+}
+.settingsGrid label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.settingsGrid label.checkSetting {
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+}
+.settingsGrid input[type='range'] {
+  width: 100%;
+  margin: 0;
+}
+.menuToolbar {
+  gap: 8px;
+  padding: 0;
+  margin-bottom: 24px;
+}
+.menuToolbar button {
+  min-height: 44px;
+}
+.hubPanel button, .hubPanel input, .hubPanel summary {
+  overflow-wrap: break-word;
+}
+
+/* Combat HUD: two side columns, one event lane, a clear center. */
+header {
+  left: var(--hud-edge);
+  right: var(--hud-edge);
+}
+.topbuttons {
+  gap: 8px;
+}
+#hud {
+  left: var(--hud-edge);
+  right: var(--hud-edge);
+  top: 88px;
+}
+#hud .timer {
+  display: none;
+}
+#hud .encounter {
+  max-width: 200px;
+  text-align: right;
+}
+#hud .encounter small {
+  display: none;
+}
+#hud .encounter b {
+  font-size: 23px;
+}
+#hud .encounter span {
+  font-size: 10px;
+}
+#weaponHud, #boardCoordinates, #threatHud {
+  display: none;
+}
+#abilityHud {
+  left: var(--hud-edge);
+  right: auto;
+  top: 174px;
+  width: 205px;
+}
+#abilityHud b {
+  font: 13px/1.5 system-ui;
+}
+#abilityHud > span {
+  font-size: 10px;
+  margin: 4px 0 8px;
+}
+#objectiveStack {
+  left: var(--hud-edge);
+  top: 250px;
+  width: 240px;
+  flex-direction: column;
+  gap: 12px;
+}
+#objectiveStack #arenaGoal {
+  padding: 14px 16px;
+  background: #101720b8;
+  border: 1px solid #ffffff16;
+  border-radius: 4px;
+}
+#arenaGoal > small {
+  display: none;
+}
+#arenaGoal h3 {
+  font: 15px/1.4 Georgia;
+  margin: 0 0 8px;
+}
+#arenaGoal p {
+  font: 11px/1.6 system-ui;
+  margin: 0 0 10px;
+}
+#objectiveStack #objectiveHud {
+  padding: 0;
+  background: none;
+  border: 0;
+  font: 10px/1.6 system-ui;
+  color: #d4c9ad;
+}
+#announcement, #status, #combatCoach {
+  position: fixed;
+  top: 158px;
+  bottom: auto;
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%);
+  width: min(430px, 40vw);
+  max-width: none;
+  margin: 0;
+  text-align: center;
+  pointer-events: none;
+  z-index: 8;
+}
+#announcement small {
+  font: 9px/1.6 system-ui;
+  letter-spacing: 1.6px;
+}
+#announcement h2 {
+  font: 24px/1.3 Georgia;
+  letter-spacing: 0;
+  margin: 6px 0 0;
+}
+#status, #combatCoach {
+  font: 12px/1.6 system-ui;
+  color: #f5dfb2;
+}
+#combatCoach:empty, #teamHud:empty {
+  display: none;
+}
+#peerHud {
+  top: 174px;
+  right: var(--hud-edge);
+  width: 185px;
+}
+#teamHud {
+  top: 248px;
+  right: var(--hud-edge);
+  left: auto;
+  max-width: 230px;
+  padding: 0;
+  font: 11px/1.6 system-ui;
+}
+#practiceHud {
+  top: 250px;
+  left: var(--hud-edge);
+  width: 240px;
+  padding: 12px 16px;
+  font: 11px/1.6 system-ui;
+}
+#bossHud, #targetHud {
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%);
+  width: min(480px, 46vw);
+  bottom: 104px;
+}
+#bossHud .bossTop small {
+  display: none;
+}
+#bossHud .bossTop {
+  justify-content: flex-end;
+}
+#bossHud h3 {
+  font-size: 18px;
+  letter-spacing: 1px;
+  margin: 6px 0 10px;
+}
+#bossHint {
+  font: 10px/1.5 system-ui;
+  letter-spacing: 0;
+  margin-top: 6px;
+}
+.bottomHint {
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: calc(100% - 40px);
+  bottom: 24px;
+  justify-content: center;
+  font-size: 10px;
+}
+.bottomHint .cameraHint {
+  display: none;
+}
+#tutorialPanel {
+  left: var(--hud-edge);
+  top: 250px;
+  width: 260px;
+}
+body.menu #announcement, body.menu #status {
+  display: none;
+}
+@media (max-width: 900px) {
+  .modeCard {
+    padding: 20px;
+  }
+  .loadoutGrid, .matchPreferences, .settingsGrid, .runOptions {
+    gap: 16px;
+  }
+  .matchControls {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .matchControls .primary {
+    width: 100%;
+  }
+  #objectiveStack, #practiceHud {
+    width: 200px;
+  }
+  #announcement, #status, #combatCoach {
+    width: min(350px, 40vw);
+  }
+}
+@media (max-width: 650px) {
+  :root {
+    --hud-edge: max(12px, env(safe-area-inset-left), env(safe-area-inset-right));
+  }
+  body.menu header {
+    left: 6%;
+    right: 6%;
+  }
+  .hubNav {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 4px;
+    padding: 0 0 12px;
+    margin-bottom: 20px;
+  }
+  .hubNav > button {
+    width: 100%;
+    min-width: 0;
+    min-height: 44px;
+    padding: 10px 4px;
+    font-size: 11px;
+  }
+  .hubNav .moreMenu {
+    grid-column: 1 / -1;
+    margin: 0;
+  }
+  .hubNav .moreMenu summary {
+    padding: 8px 4px;
+    min-height: 40px;
+  }
+  #hubContent .hubPanel {
+    padding-bottom: 16px;
+  }
+  .hub.homeIdle #panel-campaign {
+    padding-top: 12px;
+  }
+  .campaignActions {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+  .campaignActions #start {
+    width: 100%;
+    min-width: 0;
+    min-height: 56px;
+  }
+  .campaignActions #startTutorial {
+    width: 100%;
+    min-height: 44px;
+    text-align: left;
+  }
+  .hub .intro #description {
+    margin-bottom: 24px;
+  }
+  .hub .intro .playSummary {
+    margin: 8px 0 24px;
+  }
+  .menuDisclosure > summary {
+    gap: 12px;
+  }
+  .menuDisclosure > summary > span {
+    max-width: 45%;
+  }
+  .loadoutGrid, .matchPreferences, .settingsGrid, .audioSettings, .runOptions {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .modeGrid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .modeCard {
+    padding: 20px;
+  }
+  .joinControls {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+  }
+  .joinControls .outlineBtn {
+    min-width: 0;
+    padding: 12px;
+  }
+  .menuToolbar {
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .menuToolbar button {
+    padding: 10px;
+  }
+  #hud {
+    top: 80px;
+  }
+  #abilityHud {
+    top: 146px;
+    width: 145px;
+  }
+  #abilityHud b {
+    font-size: 11px;
+  }
+  #abilityHud > span {
+    font-size: 9px;
+  }
+  #objectiveStack {
+    top: 216px;
+    width: min(175px, 45vw);
+  }
+  #objectiveStack #arenaGoal {
+    padding: 10px;
+  }
+  #arenaGoal h3 {
+    font-size: 13px;
+  }
+  #arenaGoal p {
+    font-size: 10px;
+  }
+  #announcement, #status, #combatCoach {
+    top: 128px;
+    width: min(350px, calc(100% - 24px));
+  }
+  #announcement h2 {
+    font-size: 20px;
+  }
+  #announcement small {
+    font-size: 8px;
+  }
+  #status, #combatCoach {
+    font-size: 11px;
+  }
+  #peerHud {
+    top: 170px;
+    width: 130px;
+  }
+  #teamHud {
+    top: 236px;
+    width: 145px;
+    font-size: 10px;
+  }
+  #practiceHud, #tutorialPanel {
+    top: 216px;
+    width: min(200px, 53vw);
+  }
+  #bossHud, #targetHud {
+    width: 64vw;
+    bottom: 112px;
+  }
+  #bossHud h3 {
+    font-size: 14px;
+  }
+  #bossPhase {
+    font-size: 8px;
+    flex-basis: auto;
+  }
+  .bottomHint {
+    display: none;
+  }
+}
+@media (max-height: 550px) {
+  #objectiveStack {
+    top: 180px;
+    width: 185px;
+  }
+  #abilityHud {
+    top: 140px;
+    width: 170px;
+  }
+  #abilityHud b {
+    font-size: 11px;
+  }
+  #abilityHud > span {
+    display: none;
+  }
+  #announcement, #status, #combatCoach {
+    top: 92px;
+    width: 38vw;
+  }
+  #announcement h2 {
+    font-size: 19px;
+  }
+  #peerHud {
+    top: 150px;
+  }
+  #teamHud {
+    top: 212px;
+    max-width: 180px;
+  }
+  #practiceHud, #tutorialPanel {
+    top: 184px;
+  }
+  #bossHud, #targetHud {
+    bottom: 76px;
+  }
+  .bottomHint {
+    display: none;
+  }
+}
+
+/* Touch layouts use the same lanes; avoid inherited offsets from the older HUD. */
+#networkHud {
+  right: var(--hud-edge);
+  top: 146px;
+}
+#networkQuality {
+  font-size: 9px;
+}
+#teamHud {
+  top: 258px;
+}
+body.mobile-controls #combatCoach {
+  display: block;
+}
+body.mobile-controls #combatCoach:empty {
+  display: none;
+}
+body.mobile-controls #status {
+  top: 158px;
+  font-size: 12px;
+}
+body.mobile-controls #targetHud, body.mobile-controls #bossHud {
+  left: 50%;
+  right: auto;
+  top: auto;
+  width: min(480px, 46vw);
+  bottom: 104px;
+  transform: translateX(-50%);
+}
+body.mobile-controls #peerHud {
+  top: 174px;
+  right: var(--hud-edge);
+  width: 185px;
+}
+body.mobile-controls #teamHud {
+  top: 258px;
+  right: var(--hud-edge);
+  max-width: 230px;
+  font-size: 11px;
+}
+body.mobile-controls #objectiveStack {
+  top: 250px;
+  width: 240px;
+}
+body.mobile-controls #abilityHud {
+  top: 174px;
+  left: var(--hud-edge);
+  width: 205px;
+}
+@media (max-width: 650px) and (min-height: 551px) {
+  #announcement, #status, #combatCoach, body.mobile-controls #status {
+    top: 210px;
+  }
+  #objectiveStack, #practiceHud, #tutorialPanel, body.mobile-controls #objectiveStack {
+    top: 280px;
+  }
+  body.mobile-controls #objectiveStack {
+    width: min(175px, 45vw);
+  }
+  #peerHud, body.mobile-controls #peerHud {
+    top: 146px;
+    width: 130px;
+  }
+  #teamHud, body.mobile-controls #teamHud {
+    top: 280px;
+    width: 145px;
+    font-size: 10px;
+  }
+  body.mobile-controls #abilityHud {
+    top: 146px;
+    width: 145px;
+  }
+  body.mobile-controls #targetHud, body.mobile-controls #bossHud {
+    bottom: calc(32vh + 24px);
+    width: 70vw;
+  }
+  #networkHud {
+    top: 126px;
+  }
+}
+@media (max-height: 550px) {
+  body.mobile-controls #status {
+    top: 92px;
+  }
+  body.mobile-controls #objectiveStack {
+    top: 180px;
+    width: 185px;
+  }
+  body.mobile-controls #abilityHud {
+    top: 140px;
+    width: 170px;
+  }
+  body.mobile-controls #peerHud {
+    top: 150px;
+    width: 150px;
+  }
+  body.mobile-controls #teamHud {
+    top: 214px;
+    width: 180px;
+    display: block;
+  }
+  body.mobile-controls #teamHud:empty {
+    display: none;
+  }
+  body.mobile-controls #bossHud, body.mobile-controls #targetHud {
+    top: auto;
+    bottom: 76px;
+    width: 42vw;
+  }
+}
+@media (min-width: 651px) and (max-width: 900px) {
+  #abilityHud, body.mobile-controls #abilityHud { width: 170px; }
+  #abilityHud b { font-size: 12px; }
+  #peerHud, body.mobile-controls #peerHud { width: 150px; }
+}
+#hubContent {
+  min-width: 0;
+  overflow-anchor: none;
+}
+#hubContent #runOutcome {
+  width: 100%;
+  max-width: var(--panel-width);
+  min-width: 0;
+  margin: 0 0 24px;
+}
+#runOutcome #runChronicle,
+#runOutcome #deathRecap {
+  width: 100%;
+  min-width: 0;
+  max-height: none;
+  overflow: visible;
+}
+#runOutcome #deathRecap > div {
+  flex: 1;
+  min-width: 0;
+}
+#runOutcome #retryFight {
+  flex: 0 0 auto;
+}
+.run-result #panel-campaign .campaignActions {
+  justify-content: flex-start;
+  margin: 0;
+}
+.run-result #panel-campaign {
+  min-height: 0;
+}
+#chronicleFeedback:empty {
+  display: none;
+}
+@media (max-width: 750px) {
+  #runOutcome #deathRecap {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+  #runOutcome #retryFight {
+    width: 100%;
+    min-width: 0;
+  }
+  .run-result #panel-campaign .campaignActions {
+    width: 100%;
+  }
+}

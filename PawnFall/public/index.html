@@ -9,7 +9,7 @@
       name="description"
       content="A third-person chess combat arena. Sword, shield, dodge, survive."
     />
-    <link rel="stylesheet" href="style.css?v=34-first-blood" />
+    <link rel="stylesheet" href="style.css?v=37-results-alignment" />
   </head>
   <body>
     <div id="viewport" aria-label="3D combat arena"></div>
@@ -47,7 +47,7 @@
         ><span id="remaining">3 enemies remain</span>
       </div>
     </div>
-    <div id="announcement" role="status">
+    <div id="announcement" role="status" aria-atomic="true">
       <small id="announceSmall">ENCOUNTER I</small>
       <h2 id="announceTitle">The opening gambit</h2>
     </div>
@@ -147,8 +147,8 @@
         ><button id="exitTutorial" data-ui-nav class="outlineBtn">EXIT TUTORIAL</button>
       </div>
     </section>
-    <div id="status" aria-live="polite"></div>
-    <div id="combatCoach" role="status"></div>
+    <div id="status" role="status" aria-live="polite" aria-atomic="true"></div>
+    <div id="combatCoach" role="status" aria-atomic="true"></div>
     <div id="objectiveStack">
       <div id="objectiveHud"></div>
       <section id="arenaGoal" hidden aria-label="Arena objective">
@@ -186,15 +186,17 @@
           ><button id="navResume" data-ui-nav type="button" hidden>RESUME RUN →</button>
         </nav>
         <nav class="hubNav" aria-label="Game sections">
-          <button data-tab="campaign" class="active">CAMPAIGN</button
-          ><button data-tab="multiplayer">MULTIPLAYER</button
-          ><button data-tab="armory">ARMORY</button>
+          <span class="navEyebrow">THE FALLEN COURT</span>
+          <button data-tab="campaign" class="active">Play <span>01</span></button>
+          <button data-tab="multiplayer">Multiplayer <span>02</span></button>
+          <button data-tab="armory">Armory <span>03</span></button>
+          <button data-tab="settings">Settings <span>04</span></button>
           <details id="moreMenu" class="moreMenu">
-            <summary id="moreMenuToggle">MORE</summary>
+            <summary id="moreMenuToggle">Explore more</summary>
             <div class="moreMenuItems">
-              <button data-tab="training">TRAINING</button
-              ><button data-tab="bestiary">BESTIARY</button><button data-tab="honors">HONORS</button
-              ><button data-tab="settings">SETTINGS</button>
+              <button data-tab="training">Training</button>
+              <button data-tab="bestiary">Bestiary</button>
+              <button data-tab="honors">Honors &amp; progress</button>
             </div>
           </details>
           <span id="profileTitle">Wanderer</span>
@@ -236,9 +238,19 @@
               <small id="overline">FOUR REALMS. ONE UNBROKEN SOUL.</small>
               <h1 id="title">Claim your<br /><em>kingdom.</em></h1>
               <p id="description">
-                Twenty encounters across four fallen realms.<br />Survive the court. Earn your
-                crown.
+                A fallen kingdom. A sword in your hand.<br />Enter the court and earn your crown.
               </p>
+              <div class="campaignActions">
+                <button id="start" class="primary" disabled>FORGING THE ARENA…</button
+                ><button id="startTutorial" type="button" class="outlineBtn">
+                  How to play</button>
+              </div>
+              <p id="playSummary" class="playSummary">Solo campaign · Standard difficulty</p>
+              <details id="campaignSetup" class="menuDisclosure campaignSetup">
+                <summary>Customize run <span>Realm, difficulty &amp; challenges</span></summary>
+                <div class="disclosureBody">
+                  <button id="learn" class="textButton">Read combat controls ↗</button>
+                  <h3 class="setupHeading">Choose your realm</h3>
               <div id="chapters" class="chapterGrid"></div>
               <div class="runSetup">
                 <div class="difficultyControl">
@@ -252,18 +264,13 @@
                   <p id="difficultyHint"></p>
                 </div>
               </div>
-              <div class="campaignActions">
-                <button id="start" class="primary" disabled>FORGING THE ARENA…</button
-                ><button id="newRun" data-ui-nav type="button" class="outlineBtn" hidden>
+                <button id="newRun" data-ui-nav type="button" class="outlineBtn" hidden>
                   START NEW RUN</button
                 ><button id="continueRun" type="button" class="outlineBtn" hidden>
                   CONTINUE SAVED RUN</button
                 ><button id="resumeCheckpoint" class="outlineBtn" disabled>
-                  CONTINUE CHECKPOINT</button
-                ><button id="startTutorial" type="button" class="outlineBtn">
-                  LEARN COMBAT · PLAY TUTORIAL</button
-                ><button id="learn" class="textButton">Learn to survive ↗</button>
-              </div>
+                  CONTINUE CHECKPOINT</button>
+
               <div class="campaignSecondary">
                 <details id="advancedRun" class="menuDisclosure">
                   <summary>Run rules <span>Modifiers &amp; checkpoint settings</span></summary>
@@ -308,6 +315,8 @@
                   </div>
                 </details>
               </div>
+                </div>
+              </details>
             </div>
           </section>
           <section id="panel-multiplayer" class="hubPanel" hidden>
@@ -334,6 +343,24 @@
             </section>
             <button id="rejoinCoop" class="primary" hidden>REJOIN CO-OP</button>
             <p id="lobbyConnection" class="subtle" role="status"></p>
+            <div class="modeGrid">
+              <button class="modeCard active" data-mode="coop">
+                <span>♟ ♟</span><b>Co-op expedition</b>
+                <p>
+                  Team up to conquer six encounters and three bosses. Fight together. Revive your ally.
+                </p>
+                <small>2 PLAYERS · SHARED ENEMIES</small></button
+              ><button class="modeCard" data-mode="versus">
+                <span>⚔</span><b>Versus duel</b>
+                <p>
+                  Face another player with equal equipment. Win with timing, steel, and stamina.
+                </p>
+                <small>1 VS 1 · CASUAL MATCHMAKING</small>
+              </button>
+            </div>
+            <details class="menuDisclosure matchOptions">
+              <summary>Match options <span>Difficulty &amp; duel format</span></summary>
+              <div class="disclosureBody">
             <div class="matchPreferences">
               <div class="fieldGroup">
                 <label class="titleSelect"
@@ -359,25 +386,8 @@
             <p class="subtle matchPreferenceNote">
               Public co-op pairs the same difficulty. Private rooms use the host’s choice.
             </p>
-            <div class="modeGrid">
-              <button class="modeCard active" data-mode="coop">
-                <span>♟ ♟</span><b>Co-op expedition</b>
-                <p>
-                  Two pawns. One fallen court. Clear six encounters together, ending with the Fallen
-                  King. Fifteen-minute expedition limit. Hold Revive near a fallen ally for three
-                  seconds before their 30-second timer expires. Clearing an encounter also restores
-                  fallen allies.
-                </p>
-                <small>2 PLAYERS · SHARED ENEMIES</small></button
-              ><button class="modeCard" data-mode="versus">
-                <span>⚔</span><b>Versus duel</b>
-                <p>
-                  Equal equipment, no stat bonuses. Outplay another pawn with steel, stamina, and
-                  timing. Five-minute limit.
-                </p>
-                <small>1 VS 1 · CASUAL MATCHMAKING</small>
-              </button>
-            </div>
+              </div>
+            </details>
             <div class="matchControls">
               <label
                 >YOUR NAME<input
@@ -385,17 +395,18 @@
                   maxlength="24"
                   placeholder="Wanderer"
                   autocomplete="off" /></label
-              ><button id="findMatch" class="primary">FIND A MATCH</button
-              ><button id="privateMatch" class="outlineBtn">CREATE PRIVATE ROOM</button>
+              ><button id="findMatch" class="primary">FIND A MATCH</button>
             </div>
-            <div class="joinControls">
-              <input
-                id="roomCode"
-                aria-label="Room code"
-                maxlength="6"
-                placeholder="ROOM CODE"
-              /><button id="joinMatch" class="outlineBtn">JOIN ROOM</button>
-            </div>
+            <details class="menuDisclosure privateRooms">
+              <summary>Play with a friend <span>Create or join a private room</span></summary>
+              <div class="disclosureBody">
+                <button id="privateMatch" class="outlineBtn">CREATE PRIVATE ROOM</button>
+                <div class="joinControls">
+                  <input id="roomCode" aria-label="Room code" maxlength="6" placeholder="ROOM CODE" />
+                  <button id="joinMatch" class="outlineBtn">JOIN ROOM</button>
+                </div>
+              </div>
+            </details>
             <div id="queueState" hidden>
               <span class="spinner"></span>
               <div>
@@ -411,15 +422,6 @@
             </p>
           </section>
           <section id="panel-armory" class="hubPanel" hidden>
-            <div class="runOptions">
-              <label
-                >CURSED RELIC · OPTIONAL<select id="curseSelect"></select
-                ><small id="curseDetail"></small></label
-              ><label
-                >CO-OP ROLE<select id="roleSelect"></select
-                ><small id="roleDetail"></small
-              ></label>
-            </div>
             <small class="sectionEyebrow">EARNED IN BATTLE. WORN WITH PRIDE.</small>
             <h2>The armory</h2>
             <p class="subtle">Choose your weapon. Earn cosmetics through combat.</p>
@@ -443,6 +445,18 @@
               Choose before entering solo or multiplayer. Run upgrades reset each run and are
               disabled in versus.
             </p>
+            <details class="menuDisclosure">
+              <summary>Relics &amp; team roles <span>Optional build choices</span></summary>
+              <div class="disclosureBody">
+            <div class="runOptions">
+              <label
+                >CURSED RELIC · OPTIONAL<select id="curseSelect"></select
+                ><small id="curseDetail"></small></label
+              ><label
+                >CO-OP ROLE<select id="roleSelect"></select
+                ><small id="roleDetail"></small
+              ></label>
+            </div>
             <div class="fieldGroup relicField">
               <label class="titleSelect"
                 >BOSS RELIC
@@ -456,11 +470,18 @@
                 co-op; relics are disabled in versus.
               </p>
             </div>
+              </div>
+            </details>
+            <details class="menuDisclosure">
+              <summary>Appearance <span>Skins &amp; player title</span></summary>
+              <div class="disclosureBody">
             <div id="skins" class="skinGrid"></div>
             <label class="titleSelect"
               >YOUR TITLE
               <select id="titleSelect"></select
             ></label>
+              </div>
+            </details>
           </section>
           <section id="panel-training" class="hubPanel" hidden>
             <small class="sectionEyebrow">MAKE EVERY MISTAKE HERE FIRST</small>
@@ -569,7 +590,7 @@
             </div>
             <p id="performanceNotice" class="subtle" role="status"></p>
             <button id="retuneGraphics" class="outlineBtn">RECHECK PERFORMANCE</button>
-            <div class="settingsSection mobileSettings">
+            <details class="menuDisclosure settingsSection mobileSettings"><summary>Touch controls <span>Layout &amp; accessibility</span></summary><div class="disclosureBody">
               <h3>Mobile combat controls</h3>
               <p class="subtle">
                 Drag controls in the preview to reposition them. Portrait and landscape layouts save
@@ -623,8 +644,8 @@
               <button id="resetMobileLayout" data-ui-nav type="button" class="outlineBtn">
                 RESET MOBILE LAYOUT
               </button>
-            </div>
-            <div class="settingsSection">
+            </div></details>
+            <details class="menuDisclosure settingsSection"><summary>Keyboard &amp; controller <span>Bindings &amp; reference</span></summary><div class="disclosureBody">
               <p id="controllerStatus" class="subtle"></p>
               <p class="subtle">
                 Gamepad: left stick move, right stick camera, RB attack, RT heavy, LB guard, B roll,
@@ -643,7 +664,7 @@
               <div id="keyBindings" class="bindingGrid"></div>
               <p id="bindingNotice" class="subtle" role="status"></p>
               <button id="resetBindings" class="outlineBtn">RESTORE DEFAULT CONTROLS</button>
-            </div>
+            </div></details>
           </section>
           <section id="panel-bestiary" class="hubPanel" hidden>
             <small class="sectionEyebrow">KNOW THE PIECE. READ THE THREAT.</small>
@@ -917,7 +938,7 @@
     </div>
     <script
       defer
-      src="game.js?v=34-first-blood"
+      src="game.js?v=37-results-alignment"
       onerror="document.querySelector('#error').hidden=false;document.querySelector('#errorText').textContent='The game file could not be loaded. Please check your connection and reload.'"
     ></script>
   </body>

@@ -23,12 +23,14 @@ export function createHub(progress, hooks) {
       next = 'campaign';
     hooks.beforeShow?.();
     tab = next;
+    document.querySelector('.hub').dataset.screen = next;
+    $('#campaignSetup').open = false;
     $('#runOutcome').hidden =
       !['campaign', 'multiplayer'].includes(next) ||
       ($('#runChronicle').hidden && $('#deathRecap').hidden);
     $('#moreMenuToggle').classList.toggle(
       'active',
-      ['training', 'bestiary', 'honors', 'settings'].includes(next),
+      ['training', 'bestiary', 'honors'].includes(next),
     );
     if (next !== 'campaign')
       for (const id of ['advancedRun', 'challengeMenu']) $('#' + id).open = false;
@@ -44,7 +46,11 @@ export function createHub(progress, hooks) {
     }
     document
       .querySelectorAll('[data-tab]')
-      .forEach((b) => b.classList.toggle('active', b.dataset.tab === next));
+      .forEach((b) => {
+        b.classList.toggle('active', b.dataset.tab === next);
+        if (b.dataset.tab === next) b.setAttribute('aria-current', 'page');
+        else b.removeAttribute('aria-current');
+      });
     for (let id of [
       'campaign',
       'multiplayer',

@@ -1,3 +1,4 @@
+import { NoticeGate } from './hud-notices.mjs';
 import { configureTutorial, tutorialEvent, TUTORIAL_STEPS } from '../shared/tutorial.mjs';
 import { PerformanceTuner } from './performance-tuner.mjs';
 import { EndlessRecords } from './endless-records.mjs';
@@ -319,17 +320,30 @@ function startBossChallenge(realm = 0, retry = null) {
   );
 }
 
+const notices = new NoticeGate();
+
 function announce(top, title) {
+  if (!notices.accept(top + ' ' + title, view.renderTime, { priority: 2, duration: 2.6 })) return;
+  $('#status').style.opacity = 0;
+  $('#status').hidden = true;
+  $('#announcement').hidden = false;
+  view.statusUntil = 0;
   $('#announceSmall').textContent = top;
   $('#announceTitle').textContent = title;
-  view.announceUntil = view.renderTime + 3.1;
+  view.announceUntil = view.renderTime + 2.6;
   $('#announcement').style.opacity = '1';
 }
 
 function status(t) {
+  const priority = /UNDER ATTACK|GUARD BROKEN|ALLY DOWN|Not enough stamina|Could not|cannot pause/i.test(t) ? 3 : 1;
+  if (!notices.accept(t, view.renderTime, { priority, duration: 2.2 })) return;
+  $('#announcement').style.opacity = 0;
+  $('#announcement').hidden = true;
+  $('#status').hidden = false;
+  view.announceUntil = 0;
   $('#status').textContent = t;
   $('#status').style.opacity = 1;
-  view.statusUntil = view.renderTime + 1.7;
+  view.statusUntil = view.renderTime + 2.2;
 }
 
 function processEvents() {
@@ -379,10 +393,7 @@ function processEvents() {
         );
         break;
       case 'arenaShiftTell':
-        announce(
-          'ARENA WARNING · MOVE CLEAR',
-          ev.kind === 'gates' ? 'Iron gates are rising' : 'A pillar is falling',
-        );
+        // The contextual warning carries this cue while the ground telegraph remains visible.
         break;
       case 'arenaShiftImpact':
         visuals.spawnParticles(ev.x, ev.z, '#c7a182', 18);
@@ -405,7 +416,6 @@ function processEvents() {
         break;
       case 'eventChosen':
         visuals.syncActors();
-        if (!ev.remote) status('JOURNEY CHOICE CONFIRMED');
         break;
       case 'rivalRetreat':
         announce('SER VEYR RETREATS', 'He will remember how you fought.');
@@ -507,7 +517,6 @@ function processEvents() {
         }
         break;
       case 'abilityTell':
-        status((ev.enemy ? 'ENEMY ' : '') + pieceById(ev.kind).ability.toUpperCase());
         break;
       case 'abilityImpact':
         visuals.shockwave(ev.x, ev.z, true, ev.kind === 'bishop' ? '#c4ddff' : '#f7ecc2');
@@ -543,7 +552,6 @@ function processEvents() {
         visuals.steelSparks(ev.x ?? game.player.x, ev.z ?? game.player.z, 1.1, ev.nx, ev.nz);
         visuals.spawnParticles(game.player.x, game.player.z, '#ffe3ac', 24, 1.3);
         audioFx('block');
-        status('GUARDED');
         view.shake = 0.06;
         break;
       case 'objectiveComplete':
@@ -563,7 +571,6 @@ function processEvents() {
         break;
       case 'enemyBlock':
         visuals.react(ev.id, 'block', ev);
-        status('FRONTAL GUARD · FLANK, FINISH OR BREAK POSTURE');
         audioFx('armor');
         break;
       case 'guardBreak':
@@ -572,10 +579,8 @@ function processEvents() {
         audioFx('posture');
         break;
       case 'squadTell':
-        status('PINCER ATTACK · WATCH THE KNIGHT');
         break;
       case 'hazardTell':
-        status('ARENA STRIKE · LEAVE THE MARKED AREA');
         audioFx('cast');
         break;
       case 'teamFinisher':
@@ -587,7 +592,6 @@ function processEvents() {
         audioFx('heavy');
         break;
       case 'teamPing':
-        status(ev.remote ? 'ALLY PINGED THEIR LOCATION' : 'LOCATION SHARED');
         break;
       case 'revived':
         status('ALLY REVIVED · BACK TO THE FIGHT');
@@ -755,6 +759,9 @@ function finish(won) {
     game.endless ? 'Endless · Checkmate' : won ? 'Victory' : 'Checkmate',
   );
   $('#chronicleFeedback').textContent = '';
+  // Results replace the scrolled menu. Always reveal the summary from its top.
+  $('#hubContent').scrollTop = 0;
+  $('#panel-campaign').scrollTop = 0;
   if (game.souls > best) {
     best = game.souls;
     try {
@@ -827,7 +834,10 @@ function combatActive() {
 }
 
 function start(options = {}) {
-  for (const id of ['moreMenu', 'advancedRun', 'challengeMenu']) $('#' + id).open = false;
+  notices.reset();
+  view.announceUntil = view.statusUntil = 0;
+  $('#announcement').style.opacity = $('#status').style.opacity = 0;
+  for (const id of ['moreMenu', 'campaignSetup', 'advancedRun', 'challengeMenu']) $('#' + id).open = false;
   closeHelp();
   customSelects?.close();
   settingsUI?.cancel();
@@ -936,7 +946,7 @@ function pause() {
 }
 
 function resume() {
-  for (const id of ['moreMenu', 'advancedRun', 'challengeMenu']) $('#' + id).open = false;
+  for (const id of ['moreMenu', 'campaignSetup', 'advancedRun', 'challengeMenu']) $('#' + id).open = false;
   closeHelp();
   customSelects?.close();
   settingsUI?.cancel();
@@ -1134,6 +1144,10 @@ function bind() {
     }
   };
   $('#start').onclick = () => {
+    if (game.mode === 'ready' && !network.room) {
+      if (runs.available) { $('#continueRun').click(); return; }
+      if (checkpoints.get(chapter)) { $('#resumeCheckpoint').click(); return; }
+    }
     if (game.endless && ['dead', 'won'].includes(game.mode)) {
       game.mode = 'ready';
       start({ retry: retryKind, endless: true });
@@ -1292,7 +1306,9 @@ function updateHUD() {
     : ['I', 'II', 'III', 'IV', 'V', 'VI'][game.wave] +
       (online && selectedMode === 'coop' ? ' / VI' : ' / V');
   let n = game.enemies.filter((e) => !e.dead).length;
-  $('#remaining').textContent = n + ' enem' + (n === 1 ? 'y' : 'ies') + ' remain';
+  $('#remaining').textContent = game.bossRush
+    ? 'Boss ' + (game.bossRush.index + 1) + ' / 3'
+    : n + ' enem' + (n === 1 ? 'y' : 'ies') + ' remain';
   let target = game.enemies.find((e) => e.id === game.lock && !e.dead);
   const boss = game.enemies.find((e) => e.boss && !e.dead);
   $('#bossHud').hidden = !boss;
@@ -1311,6 +1327,7 @@ function updateHUD() {
       'PHASE ' + (boss.phase === 2 ? 'II' : 'I') + ' · ' + bossPhaseLabel(boss);
     $('#bossHud').classList.toggle('exposed', !!boss.coreOpen);
     $('#bossHint').textContent = bossCombatHint(boss);
+    $('#bossHint').hidden = !boss.coreOpen;
   }
   const piece = pieceById(game.chessClass);
   const remaining = Math.max(0, (game.abilityReadyAt || 0) - game.time);
@@ -1326,7 +1343,7 @@ function updateHUD() {
   $('#reticle').hidden = !target;
   if (target) {
     $('#championHint').textContent = target.championHint || '';
-    $('#championHint').hidden = !(target.champion || target.rival);
+    $('#championHint').hidden = !(target.champion || target.rival) || target.state !== 'stagger';
     $('#targetName').textContent =
       target.boss || target.champion || target.rival
         ? target.name
@@ -1343,7 +1360,7 @@ function updateHUD() {
     $('#reticle').style.top = (-v.y * 0.5 + 0.5) * innerHeight + 'px';
     if (v.z > 1) $('#reticle').hidden = true;
   }
-  if (game.time > 15) $('#bottomHint').style.opacity = 0.4;
+  $('#bottomHint').hidden = game.time > 10 || !!game.training;
   $('#peerHud').hidden = !online || !game.peer;
   if (online && game.peer) {
     $('#peerName').textContent =
@@ -1368,23 +1385,24 @@ function updateCombatGuidance() {
   const arena = game.arenaObjective;
   $('#objectiveHud').textContent =
     !practice && game.mode === 'playing' && (!online || selectedMode === 'coop') && objective
-      ? `BONUS · ${objective.title} · ${objective.progress}/${objective.goal} · +${objective.reward} souls on clear`
+      ? `Bonus · ${objective.title} · ${objective.progress}/${objective.goal}`
       : '';
   const arenaVisible =
     !practice && (!online || selectedMode === 'coop') && !!arena && game.mode === 'playing';
-  $('#arenaGoal').hidden = !arenaVisible;
+  $('#arenaGoal').hidden = !arenaVisible || !!practice?.tutorial;
+  $('#objectiveHud').hidden = arenaVisible || !!practice?.tutorial;
   $('#objectiveInteract').hidden = !(arenaVisible && arena.kind === 'ritual' && !arena.complete);
   if (arenaVisible) {
     $('#arenaGoalTitle').textContent = arena.title;
     let detail;
-    if (arena.complete) detail = 'GOAL SECURED · Defeat the remaining enemies.';
+    if (arena.complete) detail = 'Secured · Finish the encounter.';
     else if (arena.kind === 'capture')
       detail =
         (arena.contested
-          ? 'CONTESTED · Push enemies outside the gold ring.'
+          ? 'Contested · Clear the ring'
           : arena.occupied
-            ? 'CLAIMING · Hold the gold ring.'
-            : 'Stand inside the gold ring. Enemies inside contest it.') +
+            ? 'Hold the ring'
+            : 'Enter the gold ring') +
         ' ' +
         Math.floor(arena.progress) +
         '/' +
@@ -1400,10 +1418,10 @@ function updateCombatGuidance() {
         (sigil
           ? 'Hold ' +
             keyLabel(preferences.data.bindings.r) +
-            ' / gamepad A / INTERACT. Stand still; damage interrupts.'
-          : 'Reach a red sigil and hold ' +
+            ' · Stand still'
+          : 'At a red sigil, hold ' +
             keyLabel(preferences.data.bindings.r) +
-            ' to break it.');
+            ' to break');
     } else
       detail =
         'King: ' +
@@ -1414,7 +1432,7 @@ function updateCombatGuidance() {
         Math.floor(arena.progress) +
         '/' +
         arena.goal +
-        's. Intercept his attackers.';
+        's · Protect the king';
     if ($('#arenaGoalDetail').textContent !== detail) $('#arenaGoalDetail').textContent = detail;
     const channel =
       arena.kind === 'ritual'
@@ -1427,50 +1445,35 @@ function updateCombatGuidance() {
           : arena.progress / arena.goal) +
       '%';
   }
-  $('#practiceHud').hidden = !practice;
+  $('#practiceHud').hidden = !practice || !!practice.tutorial;
   const label = (token) => keyLabel(preferences.data.bindings[token]);
   if (practice)
     $('#practiceHud').textContent =
-      `SPARRING COURT · ${practice.behavior.toUpperCase()} · ${practice.unlimited ? 'UNLIMITED RESOURCES' : 'NORMAL STAMINA'} | Hits ${practice.hits} · Damage ${Math.round(practice.damage)} · Parries ${practice.parries} · Blocks ${practice.blocks} · Rolls ${practice.dodges}`;
-  const target =
-    game.enemies.find((e) => !e.dead && e.id === game.lock) ||
-    game.enemies.find((e) => !e.dead && e.guarding);
-  $('#combatCoach').textContent =
-    game.mode !== 'playing'
-      ? ''
-      : practice?.behavior === 'guard'
-        ? 'Break the frontal guard: flank, finish a three-hit combo, or use the warhammer.'
-        : target?.guarding
-          ? 'FRONTAL GUARD · Flank, land a finisher, or break posture.'
-          : game.stamina < 22
-            ? 'LOW STAMINA · Create space. Release guard to recover faster.'
-            : practice
-              ? `Tap ${label('k')} just before impact to parry. Use ${label(' ')} to evade. Wait for the full queen combo.`
-              : game.hazards?.length
-                ? 'ARENA STRIKE · Leave the marked area before it turns red.'
-                : `Read the windup. ${label('k')} guard / parry · ${label(' ')} evade · punish recovery.`;
-  const threats = game.enemies.filter(
-    (e) =>
-      !e.dead &&
-      ['windup', 'ability'].includes(e.state) &&
-      (!online || e.targetId === 'p' + network.seat),
-  );
-  $('#threatHud').textContent =
-    game.mode === 'playing' && threats.length
-      ? threats
-          .slice(0, 3)
-          .map(
-            (e) =>
-              (e.unblockable ? 'UNBLOCKABLE · ' : e.elite ? 'ELITE ' : '') +
-              e.type.toUpperCase() +
-              (e.squadTell
-                ? ' · PINCER'
-                : e.comboStep
-                  ? ' · COMBO ' + (e.comboStep + 1) + '/3'
-                  : ' · WINDUP'),
-          )
-          .join('   /   ')
-      : '';
+      `Practice · ${practice.hits} hits · ${Math.round(practice.damage)} damage · ${practice.parries} parries`;
+  const danger = game.enemies.find((e) =>
+    !e.dead && e.unblockable && ['windup', 'ability'].includes(e.state) &&
+    Math.hypot(e.x - game.player.x, e.z - game.player.z) < 7 &&
+    (!online || e.targetId === 'p' + network.seat));
+  const warning = game.arenaShift?.phase === 'warning';
+  const nearPortal = game.secretPortal && !game.secretPortal.used &&
+    Math.hypot(game.player.x - game.secretPortal.x, game.player.z - game.secretPortal.z) < 4;
+  $('#combatCoach').textContent = game.mode !== 'playing' || practice?.tutorial ? ''
+    : danger ? 'Unblockable · Dodge'
+    : warning ? (game.arenaShift.kind === 'gates' ? 'Gates rising · Move clear' : 'Pillar falling · Move clear')
+    : game.hazards?.length ? 'Arena strike · Leave the marked area'
+    : game.stamina < 22 ? 'Low stamina · Release guard'
+    : nearPortal ? 'Secret court · Hold ' + (view.mobileControlsActive ? 'USE' : label('r'))
+    : practice?.behavior === 'guard' ? 'Flank the guard or land a heavy attack'
+    : '';
+  // Normal enemy windups are communicated by animation and ground markers.
+  $('#threatHud').textContent = '';
+  const immediateDanger = danger || warning || game.hazards?.length;
+  $('#combatCoach').hidden = !immediateDanger && view.renderTime < notices.until;
+  if (immediateDanger || view.renderTime >= notices.until) {
+    $('#announcement').hidden = $('#status').hidden = true;
+    $('#announcement').style.opacity = $('#status').style.opacity = 0;
+    view.announceUntil = view.statusUntil = 0;
+  }
   const coop = online && selectedMode === 'coop' && game.mode === 'playing';
   $('#teamControls').hidden = !coop;
   $('#teamHud').hidden = !coop;
@@ -1489,12 +1492,13 @@ function updateCombatGuidance() {
     $('#teamHud').textContent = down
       ? down.eliminated
         ? 'FALLEN · returns when this encounter clears.'
-        : `DOWNED · ${Math.max(0, Math.ceil((down.downedUntil || game.time) - game.time))}s left · Revive ${Math.round((down.reviveProgress || 0) * 100)}% · ${game.player.dead ? 'Your ally can revive you.' : `Hold ${label('r')} nearby for 3s. Taking a hit interrupts.`}`
+        : `Downed · ${Math.max(0, Math.ceil((down.downedUntil || game.time) - game.time))}s · ${Math.round((down.reviveProgress || 0) * 100)}% revived · ${game.player.dead ? 'Wait for your ally' : 'Hold ' + label('r') + ' nearby'}`
       : opening
         ? `TEAM OPENING · Heavy attack (${label('h')}) now for bonus damage!`
         : ping
           ? `ALLY PING · ${String.fromCharCode(65 + Math.min(7, Math.max(0, Math.floor((ping.x + 10.5) / 2.625))))}${8 - Math.min(7, Math.max(0, Math.floor((ping.z + 10.5) / 2.625)))}`
-          : `Hold ${label('r')} near a fallen ally · ${label('g')} ping your location`;
+          : '';
+    $('#teamHud').hidden = !$('#teamHud').textContent;
   }
 }
 
@@ -1582,10 +1586,11 @@ function updateNavigation() {
   $('#navBack').textContent = destination === 'leave' ? 'LEAVE SESSION' : '← BACK';
   $('#navResume').hidden = !s.paused;
   $('#saveQuit').hidden = !s.paused || online || !!game.training;
-  $('#newRun').hidden = !s.paused;
+  $('#newRun').hidden = !(s.paused || (game.mode === 'ready' && (runs.available || checkpoints.get(chapter)))) || !!network.room;
+  document.querySelector('.hub').classList.toggle('homeIdle', s.tab === 'campaign' && !s.paused && !s.result && !s.connected);
   $('#navLocation').textContent =
     ({
-      campaign: 'Campaign',
+      campaign: 'Play',
       multiplayer: 'Multiplayer',
       armory: 'Armory',
       honors: 'Honors',
@@ -1623,8 +1628,8 @@ function showMenu(tab = 'campaign') {
   $('#overline').textContent = 'FOUR REALMS. ONE UNBROKEN SOUL.';
   $('#title').innerHTML = 'Claim your<br><em>kingdom.</em>';
   $('#description').textContent =
-    'Twenty encounters across four fallen realms. Survive the court. Earn your crown.';
-  $('#start').textContent = 'ENTER THE ARENA';
+    'A fallen kingdom. A sword in your hand. Enter the court and earn your crown.';
+  $('#start').textContent = 'PLAY';
   hub.show(tab);
   $('#menu').textContent = 'MENU';
 }
@@ -2237,20 +2242,7 @@ function frame(stamp) {
   visuals.updateVisuals(dt);
   view.hitPause = Math.max(0, (view.hitPause || 0) - dt);
   updateHUD();
-  const arenaNote = $('#arenaNotice');
-  arenaNote.hidden =
-    game.mode !== 'playing' || (!game.arenaShift && !game.secretPortal && !game.bossRush);
-  arenaNote.textContent =
-    game.arenaShift?.phase === 'warning'
-      ? 'MOVE CLEAR · ' + (game.arenaShift.kind === 'gates' ? 'GATES RISING' : 'PILLAR COLLAPSING')
-      : game.secretPortal && !game.secretPortal.used
-        ? 'SECRET COURT · Gold arch at the far corner · Hold ' +
-          (view.mobileControlsActive ? 'USE' : keyLabel(preferences.data.bindings.r)) +
-          ' to challenge'
-        : game.bossRush
-          ? 'THREE CROWNS · ' + (game.bossRush.index + 1) + '/3 · ' + game.flasks + ' flasks'
-          : '';
-
+  $('#arenaNotice').hidden = true;
   updateCombatGuidance();
   const tutorial = game.training?.tutorial;
   $('#tutorialPanel').hidden = !tutorial || game.mode !== 'playing';
@@ -2333,6 +2325,16 @@ function frame(stamp) {
     const c = checkpoints.get(chapter);
     $('#resumeCheckpoint').disabled = !c || !!network.room;
     $('#resumeCheckpoint').hidden = !c || runs.available || game.mode === 'paused';
+    if (game.mode === 'ready') {
+      $('#start').textContent = runs.available ? 'CONTINUE RUN' : c ? 'CONTINUE CAMPAIGN' : 'PLAY';
+    }
+    $('#playSummary').textContent = game.mode === 'paused'
+      ? 'Your run is paused. Pick up where you left off.'
+      : game.mode === 'ready' && runs.available
+        ? 'Your saved run is ready. Continue where you left off.'
+        : game.mode === 'ready' && c
+          ? 'Continue encounter ' + (c.wave + 1) + ' · ' + CHAPTERS[c.chapter].name
+          : CHAPTERS[chapter].name + ' · ' + ($('#soloDifficulty').value || 'standard').replace(/^./, (c) => c.toUpperCase());
     $('#checkpointNotice').textContent = c
       ? 'Saved encounter ' + (c.wave + 1) + ' / 5 · ' + CHAPTERS[c.chapter].name
       : 'A checkpoint saves when an encounter begins. Full-run mode restarts from encounter one.';
@@ -2402,7 +2404,7 @@ try {
   visuals.applySkin(SKINS.find((s) => s.id === progress.data.skin) || SKINS[0]);
   document.body.classList.add('menu');
   $('#start').disabled = false;
-  $('#start').textContent = 'ENTER THE ARENA';
+  $('#start').textContent = 'PLAY';
   requestAnimationFrame(frame);
 } catch (e) {
   console.error(e);

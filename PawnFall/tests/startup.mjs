@@ -53,6 +53,9 @@ function element(key) {
       this.open = false;
       for (const fn of this.events?.get('close') || []) fn();
     },
+    setAttribute(name, value) { this[name] = value; },
+    removeAttribute(name) { delete this[name]; },
+    click() { this.onclick?.(); },
     appendChild() {},
     focus() {
       focusedElement = key;
@@ -266,7 +269,7 @@ code = code.replace(
 vm.runInContext(code, sandbox, { timeout: 15000 });
 assert.equal(element('#error').hidden, true, 'initialization did not throw');
 assert.equal(element('#start').disabled, false, 'loader enables start');
-assert.equal(element('#start').textContent, 'ENTER THE ARENA');
+assert.equal(element('#start').textContent, 'PLAY');
 assert.equal(typeof element('#start').onclick, 'function', 'inputs bound');
 for (let i = 0; i < 3; i++) {
   assert(frames.length);
@@ -650,9 +653,11 @@ assert(fallenModel.visible);
 element('#leaveSession').onclick();
 element('#start').onclick();
 let retryStamp = coopStamp + 100;
+element('#hubContent').scrollTop = 400;
 for (let i = 0; i < 2400 && element('#retryFight').hidden; i++) frames.shift()((retryStamp += 16));
 assert.equal(element('#retryFight').hidden, false, 'death offers quick retry');
 assert.equal(element('#deathRecap').hidden, false);
+assert.equal(element('#hubContent').scrollTop, 0, 'death results reveal the heading instead of inheriting menu scroll');
 assert(element('#recapCause').textContent.length > 0);
 element('#retryFight').onclick();
 frames.shift()((retryStamp += 16));
@@ -872,7 +877,9 @@ const savedEnemies = JSON.stringify(navigationGame.enemies),
   savedPlayer = JSON.stringify(navigationGame.player);
 element('#saveQuit').onclick();
 assert.equal(navigationGame.mode, 'ready');
-element('#continueRun').onclick();
+frames.shift()((retryStamp += 16));
+assert.equal(element('#start').textContent, 'CONTINUE RUN', 'primary action offers the saved run');
+element('#start').onclick();
 assert.equal(navigationGame.mode, 'playing');
 assert.equal(navigationGame.hp, 43);
 assert.equal(navigationGame.stamina, 39);
@@ -926,8 +933,10 @@ assert.equal(
   false,
   'Back dismisses expanded rules before leaving the page',
 );
+element('#campaignSetup').open = true;
 element('#challengeMenu').open = true;
 element('#bossRush').onclick();
+assert.equal(element('#campaignSetup').open, false, 'starting combat closes run setup');
 assert.equal(element('#challengeMenu').open, false, 'starting combat closes challenge controls');
 assert.equal(navigationGame.mode, 'playing');
 element('#pause').onclick();
@@ -1058,3 +1067,20 @@ element('#leaveSession').onclick();
 console.log(
   'PASS: bundled same-room co-op Rejoin, authoritative pause banner/countdown and recovery dismissal.',
 );
+
+// Immediate terrain warnings take the event lane without stacking with the intro.
+element('#newRun').onclick();
+navigationGame.wave = 1;
+navigationGame.spawn();
+navigationGame.arenaShift = {
+  kind: 'gates', phase: 'warning', fireAt: navigationGame.time + 2,
+  until: navigationGame.time + 10,
+};
+frames.shift()((retryStamp += 16));
+assert.equal(element('#combatCoach').textContent, 'Gates rising · Move clear');
+assert.equal(element('#combatCoach').hidden, false);
+assert.equal(Number(element('#announcement').style.opacity), 0);
+assert.equal(Number(element('#status').style.opacity), 0);
+assert.equal(element('#arenaNotice').hidden, true, 'no duplicate terrain banner');
+assert.equal(element('#threatHud').textContent, '', 'normal windups do not create text walls');
+console.log('PASS: bundled immediate-warning priority, one visible event lane and removed duplicate combat banners.');
