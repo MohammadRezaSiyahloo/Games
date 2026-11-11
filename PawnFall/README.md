@@ -9,6 +9,7 @@ Play a solo campaign, survive an endless run, clear a co-op expedition, or face 
 ## Features
 
 - **Real-time combat:** six weapons, light and heavy attacks, combos, directional guarding, timed parries, rolls, posture breaks, and finishing strikes.
+- **Starting loadout progression:** Start with Pawn and Longsword. Finished campaign and Endless runs, co-op expeditions, and versus matches unlock starting gear in the Armory, win or lose. During eligible Pawn runs, you can try Knight, Bishop, Rook, or Queen through promotion.
 - **Chess-piece abilities:** pawn breakthroughs, knight vaults, bishop diagonals, rook charges, queen strikes, and the king's castling ward.
 - **Four realms:** twenty campaign encounters, arena objectives, optional routes, champion fights, secret encounters, and three distinct bosses.
 - **Visible boss damage:** cracked armor, fractured staffs, broken weapons and crowns, and changing attack patterns as bosses enter their second phase.

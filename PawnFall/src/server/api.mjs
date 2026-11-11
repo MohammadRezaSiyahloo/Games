@@ -2,9 +2,8 @@ import { connectionRecovery } from '../shared/connection-recovery.mjs';
 import { curseById, roleById } from '../shared/run-options.mjs';
 import { unlockedRelic } from '../shared/boss-relics.mjs';
 import { validDifficulty } from '../shared/combat-rules.mjs';
-import { pieceById } from '../shared/piece-abilities.mjs';
+import { availableLoadout, finishedPlays } from '../shared/loadout-unlocks.mjs';
 import { cleanDiscoveries, discoveriesFromStats } from '../shared/bestiary.mjs';
-import { weaponById } from '../shared/arsenal.mjs';
 import { Battle } from '../shared/battle.mjs';
 import { SKINS, ACHIEVEMENTS, TITLES } from '../shared/content.mjs';
 const json = (data, status = 200) =>
@@ -44,7 +43,7 @@ async function run(db, sql, ...args) {
 }
 
 function cleanProfile(p = {}) {
-  const stats = {};
+  const stats = { finishedPlays: finishedPlays(p.stats) };
   for (let k of [
     'kills',
     'castellanKills',
@@ -88,8 +87,8 @@ function cleanProfile(p = {}) {
     unlocked,
     skin,
     title,
-    weapon: weaponById(p.weapon).id,
-    chessClass: pieceById(p.chessClass).id,
+    weapon: availableLoadout('weapon', p.weapon, stats),
+    chessClass: availableLoadout('chessClass', p.chessClass, stats),
     bossRelic: unlockedRelic(p.bossRelic, stats),
     curse: curseById(p.curse).id,
     coopRole: roleById(p.coopRole).id,
@@ -101,6 +100,7 @@ function mergeProfile(a, b) {
   let stats = {};
   for (let k of Object.keys(cleanProfile().stats))
     stats[k] = Math.max(a?.stats?.[k] || 0, b?.stats?.[k] || 0);
+  stats.finishedPlays = Math.max(finishedPlays(a?.stats), finishedPlays(b?.stats));
   return cleanProfile({
     ...b,
     stats,
@@ -176,7 +176,9 @@ export async function api(request, env) {
       );
       if (old) return json({ room: old.id });
       const profile = await one(db, 'SELECT data FROM pf_profiles WHERE owner=?', session.owner);
-      const me = profile ? JSON.parse(profile.data) : { name: session.name, skin: session.skin };
+      const me = cleanProfile(
+        profile ? JSON.parse(profile.data) : { name: session.name, skin: session.skin },
+      );
       if (data.code) {
         let r = await one(
           db,

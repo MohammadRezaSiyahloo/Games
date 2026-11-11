@@ -99,6 +99,7 @@ export function createCustomSelects(doc = document) {
         b.tabIndex = -1;
         b.dataset.value = option.value;
         b.disabled = option.disabled;
+        if (option.disabled) b.setAttribute('aria-disabled', 'true');
         const [title, ...detail] = option.textContent.split('·');
         const text = doc.createElement('span');
         text.className = 'selectOptionText';

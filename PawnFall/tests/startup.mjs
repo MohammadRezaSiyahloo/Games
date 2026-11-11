@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 import assert from 'node:assert/strict';
 import { Battle } from '../src/shared/battle.mjs';
+import { offerPromotion } from '../src/shared/promotion.mjs';
 const damagedBossStates = new Set();
 const elements = new Map(),
   frames = [],
@@ -263,6 +264,10 @@ code = code.replace(
   'const game = window.__navigationTestGame = new Game(),',
 );
 code = code.replace(
+  'progress = new Progression(),',
+  'progress = window.__testProgression = new Progression(),',
+);
+code = code.replace(
   'network = new NetworkClient(),',
   'network = window.__rejoinTestNetwork = new NetworkClient(),',
 );
@@ -316,6 +321,36 @@ console.log(
   'PASS: bundled startup, real Three.js scene and geometry creation, menu, start button, input binding, 83 rendered simulation frames; GPU rendering excluded.',
 );
 
+const loadoutGame = sandbox.window.__navigationTestGame;
+const loadoutProgress = sandbox.window.__testProgression;
+assert.equal(loadoutGame.weapon, 'longsword');
+assert.equal(loadoutGame.chessClass, 'pawn');
+assert.match(element('#weaponSelect').innerHTML, /value="rapier" disabled.*0\/1 plays/);
+assert.match(element('#pieceSelect').innerHTML, /value="queen" disabled.*0\/10 plays/);
+element('#pieceSelect').onchange({ target: { value: 'queen' } });
+assert.equal(loadoutProgress.data.chessClass, 'pawn');
+
+loadoutGame.wave = 2;
+assert(offerPromotion(loadoutGame));
+frames.shift()(1432);
+assert(element('#upgradeCards').innerHTML.includes('data-promote="queen"'));
+element('data-promote:queen').onclick();
+assert.equal(loadoutGame.chessClass, 'queen');
+assert.equal(loadoutProgress.data.chessClass, 'pawn');
+assert.equal(loadoutProgress.data.stats.finishedPlays, 0);
+if (loadoutGame.eventChoices.length) loadoutGame.chooseEvent('decline');
+if (loadoutGame.upgradeChoices.length) loadoutGame.chooseUpgrade(loadoutGame.upgradeChoices[0]);
+loadoutGame.player.invuln = 0;
+assert.equal(loadoutGame.mode, 'playing');
+assert(loadoutGame.hurtPlayer(10000, { x: 0, z: 0, unblockable: true }));
+assert.equal(loadoutGame.mode, 'dead');
+frames.shift()(1464);
+assert.equal(savedProfile.stats.finishedPlays, 1);
+assert.equal(element('#loadoutReward').textContent, 'Rapier unlocked in the Armory.');
+assert.doesNotMatch(element('#weaponSelect').innerHTML, /value="rapier" disabled/);
+assert.match(element('#pieceSelect').innerHTML, /value="queen" disabled.*1\/10 plays/);
+console.log('PASS: fresh loadout locks, temporary Queen promotion, and first permanent unlock on defeat.');
+
 element('#menu').onclick();
 element('#bossChallenge').onclick();
 for (let i = 0; i < 480; i++) {
@@ -331,6 +366,8 @@ console.log(
 );
 element('#menu').onclick();
 let renderStamp = 10000;
+// Use a completed profile to exercise each weapon through the actual Armory.
+loadoutProgress.merge({ stats: { finishedPlays: 15 } });
 for (const weapon of ['rapier', 'warhammer', 'longsword', 'spear', 'twinblades', 'greatsword']) {
   element('#weaponSelect').onchange({ target: { value: weapon } });
   element('#confessorChallenge').onclick();
@@ -425,6 +462,7 @@ assert.equal(element('#matchResult').dataset.outcome, 'victory');
 assert(element('body').classList.contains('victorious'));
 assert.equal(element('#victoryFX').hidden, false);
 assert.equal(savedProfile.stats.versusWins, 1);
+assert.equal(savedProfile.stats.finishedPlays, 16);
 assert(savedProfile.unlocked.includes('duel_win'));
 console.log(
   'PASS: bundled network client, joining a versus code from co-op selection, peer rendering, match result and cosmetic reward.',
@@ -461,6 +499,7 @@ assert.equal(element('#sessionStatus').textContent, 'BOTH PLAYERS MUST READY UP'
 assert.equal(element('#readyMatch').disabled, false);
 assert.equal(element('#matchResult').hidden, true);
 assert.equal(savedProfile.stats.versusWins, 1, 'rematch polling does not duplicate rewards');
+assert.equal(savedProfile.stats.finishedPlays, 16, 'rematch polling counts the match once');
 element('#readyMatch').onclick();
 frames.shift()(renderStamp + 3000);
 await new Promise(setImmediate);

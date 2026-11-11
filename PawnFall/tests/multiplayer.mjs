@@ -50,11 +50,21 @@ assert.equal((await call('profile', 'wrong')).status, 401);
 await call('profile', a, {
   name: 'A',
   weapon: 'warhammer',
-  stats: { confessorKills: 1, parries: 20 },
+  stats: { confessorKills: 1, parries: 20, finishedPlays: 5 },
   skin: 'pale',
   title: 'oracle',
 });
-await call('profile', b, { name: 'B', weapon: 'rapier' });
+const locked = await call('profile', b, { name: 'B', weapon: 'rapier', chessClass: 'queen' });
+assert.equal(locked.profile.weapon, 'longsword');
+assert.equal(locked.profile.chessClass, 'pawn');
+assert.equal(locked.profile.stats.finishedPlays, 0);
+const legacy = await call('profile', b, {
+  name: 'B',
+  weapon: 'rapier',
+  stats: { wins: 1 },
+});
+assert.equal(legacy.profile.weapon, 'rapier');
+assert.equal(legacy.profile.stats.finishedPlays, 1);
 let room = await call('matchmaking', a, { mode: 'coop' });
 assert(room.room);
 let waiting = await call('room', a, { room: room.room });
@@ -117,6 +127,7 @@ const prof = await call('profile', a, {
   skin: 'void',
 });
 assert.equal(prof.profile.skin, 'ivory', 'locked skin rejected');
+assert.equal(prof.profile.stats.finishedPlays, 5, 'older clients cannot reduce play progress');
 assert(prof.profile.unlocked.includes('first_blood'));
 const prof2 = await call('profile', a, { ...prof.profile, skin: 'ember' });
 assert.equal(prof2.profile.skin, 'ember');

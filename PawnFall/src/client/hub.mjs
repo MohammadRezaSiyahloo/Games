@@ -2,6 +2,7 @@ import { CURSES, ROLES, curseById, roleById } from '../shared/run-options.mjs';
 import { BESTIARY, bestiaryEntries } from '../shared/bestiary.mjs';
 import { BOSS_RELICS, unlockedRelic, relicById } from '../shared/boss-relics.mjs';
 import { PIECES } from '../shared/piece-abilities.mjs';
+import { requiredPlays } from '../shared/loadout-unlocks.mjs';
 import { WEAPONS } from '../shared/arsenal.mjs';
 import { CHAPTERS, SKINS, ACHIEVEMENTS, TITLES } from '../shared/content.mjs';
 
@@ -147,12 +148,21 @@ export function createHub(progress, hooks) {
       .join('');
     $('#relicSelect').value = unlockedRelic(p.bossRelic, p.stats);
     $('#relicDetail').textContent = relicById($('#relicSelect').value).text;
-    $('#pieceSelect').value = p.chessClass || 'pawn';
-    $('#pieceDetail').textContent =
-      PIECES.find((c) => c.id === (p.chessClass || 'pawn'))?.text || '';
-    $('#weaponSelect').value = p.weapon || 'longsword';
-    $('#weaponDetail').textContent =
-      WEAPONS.find((w) => w.id === (p.weapon || 'longsword'))?.text || '';
+    const plays = p.stats.finishedPlays;
+    for (const [slot, selector, items, label] of loadoutFields) {
+      const select = $(selector);
+      select.innerHTML = items
+        .map((item) => {
+          const goal = requiredPlays(slot, item.id);
+          const locked = plays < goal;
+          const requirement = locked ? ' · Locked (' + plays + '/' + goal + ' plays)' : '';
+          return `<option value="${item.id}" ${locked ? 'disabled' : ''}>${label(item)}${requirement}</option>`;
+        })
+        .join('');
+      select.value = p[slot];
+    }
+    $('#pieceDetail').textContent = PIECES.find((c) => c.id === p.chessClass)?.text || '';
+    $('#weaponDetail').textContent = WEAPONS.find((w) => w.id === p.weapon)?.text || '';
     $('#skins').innerHTML = SKINS.map((s) => {
       let unlocked = !s.unlock || p.unlocked.includes(s.unlock),
         equipped = p.skin === s.id;
@@ -252,21 +262,25 @@ export function createHub(progress, hooks) {
       render();
     };
   }
-  $('#pieceSelect').innerHTML = PIECES.map(
-    (c) => `<option value="${c.id}">${c.symbol} ${c.name} · ${c.ability}</option>`,
-  ).join('');
-  $('#pieceSelect').onchange = (e) => {
-    progress.data.chessClass = e.target.value;
-    progress.save();
-  };
-  $('#weaponSelect').innerHTML = WEAPONS.map(
-    (w) => `<option value="${w.id}">${w.name}</option>`,
-  ).join('');
+  const loadoutFields = [
+    [
+      'chessClass',
+      '#pieceSelect',
+      PIECES,
+      (piece) => piece.symbol + ' ' + piece.name + ' · ' + piece.ability,
+    ],
+    [
+      'weapon',
+      '#weaponSelect',
+      [...WEAPONS].sort((a, b) => requiredPlays('weapon', a.id) - requiredPlays('weapon', b.id)),
+      (weapon) => weapon.name,
+    ],
+  ];
+  for (const [slot, selector] of loadoutFields)
+    $(selector).onchange = (e) => {
+      if (!progress.equipLoadout(slot, e.target.value)) $(selector).value = progress.data[slot];
+    };
   $('#relicSelect').onchange = (e) => progress.equipRelic(e.target.value);
-  $('#weaponSelect').onchange = (e) => {
-    progress.data.weapon = e.target.value;
-    progress.save();
-  };
   $('#displayName').value = progress.data.name;
   $('#findMatch').onclick = () => find();
   $('#privateMatch').onclick = () => find({ private: true });

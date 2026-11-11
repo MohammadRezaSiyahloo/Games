@@ -1,16 +1,24 @@
 import { cleanDiscoveries, discoveriesFromStats } from '../shared/bestiary.mjs';
 import { unlockedRelic } from '../shared/boss-relics.mjs';
 import { ACHIEVEMENTS, SKINS, TITLES } from '../shared/content.mjs';
+import {
+  availableLoadout,
+  finishedPlays,
+  LOADOUT_UNLOCKS,
+  requiredPlays,
+  STARTING_LOADOUT,
+} from '../shared/loadout-unlocks.mjs';
+
 export const freshProfile = () => ({
   name: 'Wanderer',
   skin: 'ivory',
-  weapon: 'longsword',
-  chessClass: 'pawn',
+  ...STARTING_LOADOUT,
   bossRelic: 'none',
   curse: 'none',
   coopRole: 'balanced',
   title: 'wanderer',
   stats: {
+    finishedPlays: 0,
     kills: 0,
     castellanKills: 0,
     confessorKills: 0,
@@ -39,7 +47,9 @@ export class Progression {
     try {
       Object.assign(this.data, JSON.parse(storage.getItem('pawnfall-profile-v4') || '{}'));
     } catch {}
-    this.data.stats = { ...freshProfile().stats, ...this.data.stats };
+    const plays = finishedPlays(this.data.stats);
+    this.data.stats = { ...freshProfile().stats, ...this.data.stats, finishedPlays: plays };
+    this.normalizeLoadout();
     this.data.encountered = cleanDiscoveries([
       ...cleanDiscoveries(this.data.encountered),
       ...discoveriesFromStats(this.data.stats),
@@ -106,6 +116,23 @@ export class Progression {
     }
   }
 
+  normalizeLoadout() {
+    for (const slot of ['weapon', 'chessClass'])
+      this.data[slot] = availableLoadout(slot, this.data[slot], this.data.stats);
+  }
+
+  equipLoadout(slot, id) {
+    if (requiredPlays(slot, id) > this.data.stats.finishedPlays) return false;
+    this.data[slot] = id;
+    this.save();
+    return true;
+  }
+
+  recordFinishedPlay() {
+    this.add('finishedPlays');
+    return LOADOUT_UNLOCKS.find((item) => item.plays === this.data.stats.finishedPlays);
+  }
+
   equip(skin) {
     const s = SKINS.find((s) => s.id === skin);
     if (!s || (s.unlock && !this.data.unlocked.includes(s.unlock))) return false;
@@ -132,7 +159,8 @@ export class Progression {
   merge(remote) {
     if (!remote) return;
     const local = this.data;
-    for (const k of Object.keys(local.stats))
+    local.stats.finishedPlays = Math.max(local.stats.finishedPlays, finishedPlays(remote.stats));
+    for (const k of Object.keys(local.stats).filter((k) => k !== 'finishedPlays'))
       local.stats[k] = Math.max(local.stats[k] || 0, remote.stats?.[k] || 0);
     local.encountered = cleanDiscoveries([
       ...(local.encountered || []),

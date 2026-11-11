@@ -3118,6 +3118,14 @@ select option {
   opacity: 0.4;
   cursor: not-allowed;
 }
+#pieceSelect-options .selectOption:disabled,
+#weaponSelect-options .selectOption:disabled {
+  opacity: 0.8;
+}
+.loadoutReward {
+  color: #e4c991;
+  font-weight: 600;
+}
 .settingsGrid input[type='range'] {
   appearance: none;
   -webkit-appearance: none;
@@ -4861,6 +4869,8 @@ body.menu #tutorialPanel {
     margin: 10px 0;
   }
 }
+
+/* Play is the front door. Other destinations live in a quiet side rail. */
 #overlay {
   background: linear-gradient(90deg, #090e16fa, #0e1520ee 38%, #101620b8 70%, #0c131b80);
 }
@@ -6010,6 +6020,8 @@ body.mobile-controls #abilityHud {
   #abilityHud b { font-size: 12px; }
   #peerHud, body.mobile-controls #peerHud { width: 150px; }
 }
+
+/* Results share the panel column instead of centering independently of it. */
 #hubContent {
   min-width: 0;
   overflow-anchor: none;

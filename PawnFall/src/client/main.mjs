@@ -37,6 +37,7 @@ import { weaponById, UPGRADES } from '../shared/arsenal.mjs';
 import { Game, stats, titles, clamp, dist, angleLerp } from '../shared/combat.mjs';
 import { CHAPTERS, SKINS, ACHIEVEMENTS, TITLES } from '../shared/content.mjs';
 import { createVisuals } from './rendering.mjs';
+import { availableLoadout } from '../shared/loadout-unlocks.mjs';
 import { Progression } from './progression.mjs';
 import { NetworkClient } from './network.mjs';
 import { createHub } from './hub.mjs';
@@ -101,7 +102,7 @@ let customSelects,
   lastTheme = null,
   activeRoundKey = null,
   lobbyPhaseKey = null;
-const awardedSeries = new Set();
+const awardedSeries = new Map();
 let soundWindow = 0,
   soundSlots = 0;
 
@@ -703,7 +704,16 @@ function checkmateEffect(lost, won = false) {
   $('#deathFX').hidden = !lost;
 }
 
+function showLoadoutReward(selector, reward) {
+  const name = reward
+    ? (reward.slot === 'weapon' ? weaponById(reward.id) : pieceById(reward.id)).name
+    : '';
+  $(selector).hidden = !reward;
+  $(selector).textContent = name ? name + ' unlocked in the Armory.' : '';
+}
+
 function finish(won) {
+  const reward = !online && !game.training && !game.bossTrial && progress.recordFinishedPlay();
   if (won && !game.bossTrial) checkpoints.clear(game.chapter);
   checkmateEffect(!won, won);
   document.body.classList.add('menu');
@@ -758,6 +768,7 @@ function finish(won) {
     game,
     game.endless ? 'Endless · Checkmate' : won ? 'Victory' : 'Checkmate',
   );
+  showLoadoutReward('#loadoutReward', reward);
   $('#chronicleFeedback').textContent = '';
   // Results replace the scrolled menu. Always reveal the summary from its top.
   $('#hubContent').scrollTop = 0;
@@ -867,8 +878,8 @@ function start(options = {}) {
   game.reconnecting = false;
   game.waitingForAlly = false;
   checkmateEffect(false);
-  game.chessClass = retry?.chessClass || progress.data.chessClass;
-  game.weapon = retry?.weapon || progress.data.weapon;
+  for (const slot of ['chessClass', 'weapon'])
+    game[slot] = availableLoadout(slot, retry?.[slot] ?? progress.data[slot], progress.data.stats);
   game.difficulty = retry?.difficulty || preferences.data.difficulty;
   game.runModifier = retry?.modifier || $('#runModifier').value || 'none';
   game.bossRelic = retry?.bossRelic || progress.data.bossRelic || 'none';
@@ -1774,6 +1785,7 @@ function showSessionLobby(s, events = []) {
   if (!terminal && !roundEnd) checkmateEffect(false);
   if (terminal || roundEnd) {
     const result = matchResult({ ...s, winner: roundEnd ? s.roundWinner : s.winner });
+    showLoadoutReward('#loadoutReward', null);
     $('#matchResultLabel').textContent = roundEnd
       ? 'ROUND ' + s.round + ' COMPLETE'
       : s.mode === 'versus'
@@ -1821,10 +1833,12 @@ function showSessionLobby(s, events = []) {
         : 'Final score: ' + scores.join(' — ') + '. Rewards and progress saved.';
     const rewardKey = network.room + ':' + (s.series || 1);
     if (terminal && !awardedSeries.has(rewardKey)) {
-      awardedSeries.add(rewardKey);
+      const reward = s.reason !== 'disconnect' && progress.recordFinishedPlay();
+      awardedSeries.set(rewardKey, reward);
       if (s.winner === 'team' || s.winner === s.seat)
         progress.add(s.mode === 'coop' ? 'coopWins' : 'versusWins');
     }
+    showLoadoutReward('#matchLoadoutReward', terminal && awardedSeries.get(rewardKey));
   }
 }
 
@@ -2083,7 +2097,7 @@ function updateUpgradePanel() {
   }
   if (promoting) {
     $('#upgradeNote').textContent =
-      'Two encounters survived. Choose your new piece and ability. Your weapon and blessings stay equipped.';
+      'Try a new piece and ability for this run, including pieces still locked in the Armory.';
     $('#runBuild').textContent = 'ONE PROMOTION PER RUN · THE NEW ABILITY IS READY';
     $('#upgradeCards').innerHTML = promotions
       .map((id) => {
