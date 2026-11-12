@@ -12,6 +12,14 @@ A real-time 3D chess souls-like combat game with solo campaigns, endless encount
 
 [Explore Pawnfall](PawnFall/) · [Read the instructions](PawnFall/README.md)
 
+### The Last Caravan
+
+![The Last Caravan preview](TheLastCaravan/docs/images/cover-banner.webp)
+
+A single-player survival strategy game. Guide four travelers to the Last City, manage supplies and injuries, and make decisions that can change the road ahead.
+
+[Explore The Last Caravan](TheLastCaravan/) · [Read the instructions](TheLastCaravan/README.md)
+
 ## 📁 Repository Structure
 
 ```text
@@ -23,7 +31,9 @@ Games/
 │   ├── README.md
 │   └── ...
 │
-├── ...
+└── TheLastCaravan/
+    ├── README.md
+    └── ...
 ```
 
 ## About this repository
