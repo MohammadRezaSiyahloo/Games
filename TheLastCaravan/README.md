@@ -6,10 +6,6 @@
 
 The Last Caravan is a single-player survival strategy game for the browser. Guide four travelers from Hearth Camp to the Last City. Choose which roads to risk, keep the wagon moving, and decide what you can spare when someone asks for help.
 
-[Features](#features) · [Gameplay](#gameplay) · [Run results](#run-results) · [Quick start](#quick-start) · [Expedition routes](#expedition-routes)
-
-[Controls](#controls) · [Saves and settings](#saves-and-settings) · [Project layout](#project-layout) · [Development](#development) · [Deployment](#deployment)
-
 ## Features
 
 - **Route planning.** Compare travel time, rations, wagon wear, and weather across branching routes.
