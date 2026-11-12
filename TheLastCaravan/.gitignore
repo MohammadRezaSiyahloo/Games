@@ -1,0 +1,13 @@
+node_modules/
+dist/
+src/fonts/Peyda.woff2
+
+# Local settings and generated files
+*.local
+*.log
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
+.DS_Store
+Thumbs.db
