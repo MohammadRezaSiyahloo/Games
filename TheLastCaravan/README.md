@@ -6,7 +6,18 @@
 
 The Last Caravan is a single-player survival strategy game for the browser. Guide four travelers from Hearth Camp to the Last City. Choose which roads to risk, keep the wagon moving, and decide what you can spare when someone asks for help.
 
-[Run locally](#run-locally) · [Gameplay](#gameplay) · [Expedition routes](#expedition-routes) · [Development](#development)
+[Features](#features) · [Gameplay](#gameplay) · [Run results](#run-results) · [Quick start](#quick-start) · [Expedition routes](#expedition-routes)
+
+[Controls](#controls) · [Saves and settings](#saves-and-settings) · [Project layout](#project-layout) · [Development](#development) · [Deployment](#deployment)
+
+## Features
+
+- **Route planning.** Compare travel time, rations, wagon wear, and weather across branching routes.
+- **Illustrated encounters.** Read the scene in comic panels, weigh each choice, and revisit the outcome in the Journal.
+- **Crew management.** Assign duties, treat injuries, recruit at settlements, and build bonds around the campfire.
+- **Wagon upgrades.** Choose two upgrades and balance their benefits against the timber and coins you have left.
+- **Replayable expeditions.** Choose a starting caravan and a seed, earn achievements, and replay completed runs.
+- **English and Persian.** Switch languages in the header or Settings. Persian uses right-to-left layout and Persian numerals.
 
 ## Gameplay
 
@@ -32,7 +43,7 @@ The diary breaks each leg into days and records the actual effects of travel. Op
 
 ### By the fire
 
-At **Camp**, cook, forage, treat injuries, repair the wagon, and reassign duties when someone needs time to recover. Share a watch to build bonds, or talk by the fire to hear a traveler’s story. Injuries can disable a role’s benefits and change the cost of travel. The final roll call records who made it, who fell, and what became of Tomas’s letter to Lina.
+At **Camp**, cook, forage, treat injuries, repair the wagon, and reassign duties when someone needs time to recover. Share a watch to build bonds, or talk by the fire to hear a traveler’s story. Injuries can disable a role’s benefits and change the cost of travel.
 
 ![The four travelers around camp, with illustrated cards listing Mara’s scouting, Bram’s guarding, Iona’s medicine, and Tomas’s ration savings.](docs/images/camp-ledger.webp)
 
@@ -42,12 +53,30 @@ At a settlement, spend coins on food, water, medicine, and timber, or sell spare
 
 ![Pinewatch traders, a wheelwright fitting an ironbound wheel, and ledgers showing prices, recruits, and all five wagon upgrades.](docs/images/market-and-workshop.webp)
 
+## Run results
+
+The final roll call shows who reached the Last City, who fell, and a memory from the road. It also records what happened to Tomas’s letter.
+
 <details>
 <summary>See how this expedition ends</summary>
 
 ![Journey’s End at the Last Well. The empty wagon and undelivered letter accompany the final crew roll call and route record.](docs/images/journeys-end.webp)
 
 </details>
+
+<a name="run-locally"></a>
+
+## Quick start
+
+Use **Node.js 22.18 or later** and a modern browser. From the root of a local clone of this repository, run:
+
+```sh
+cd TheLastCaravan
+npm ci
+npm run dev
+```
+
+If your terminal is already in `TheLastCaravan/`, start with `npm ci`. Open the URL printed by Vite. The game runs entirely in the browser.
 
 ## Expedition routes
 
@@ -59,31 +88,24 @@ At a settlement, spend coins on food, water, medicine, and timber, or sell spare
 
 Choose a route, starting caravan, and optional seed under **New expedition**. **Records** tracks completed runs and achievements. Replay a recent run’s seed from its record, or choose one of the starting caravans you’ve unlocked.
 
-## Run locally
+## Controls
 
-Use **Node.js 22.18 or later** and a modern browser. From the project directory, run:
+| Screen              | What to do                                                                      |
+| ------------------- | ------------------------------------------------------------------------------- |
+| **World Map**       | Select a destination to preview the leg, then choose **Travel** when ready.     |
+| **Road encounters** | Read the panels and select a response. Each option lists its costs and effects. |
+| **Camp**            | Manage supplies, crew duties, injuries, conversations, and wagon upgrades.      |
+| **Journal**         | Open previous travel days and encounter outcomes.                               |
 
-```sh
-npm ci
-npm run dev
-```
+Select **How to play** in the header for the in-game guide.
 
-Open the URL printed by Vite. **How to play** opens the in-game guide. The game runs entirely in the browser.
+## Saves and settings
 
 - **Saves.** Your expedition, records, and settings are stored in the browser for that site. Use **Settings → Portable saves** to export or import a JSON backup.
 - **Language.** Switch between English and فارسی in the header or settings. Persian uses a right-to-left layout, Persian numerals, and translated dialogue. Noto Sans Arabic is bundled. If you have a licensed copy of the Peyda variable webfont, place it at `src/fonts/Peyda.woff2` before starting or building.
 - **Graphics and sound.** The campsite uses Babylon.js and WebGL, with an illustrated fallback. Settings include sound, volume, and campsite animation.
 
-## Development
-
-```sh
-npm run format:check
-npm test
-npm run build
-npm run preview
-```
-
-Use `npm run format` to apply Prettier formatting. The build type-checks TypeScript and writes the static game to `dist/`. Serve the contents of `dist/` over HTTP. Asset paths support deployment at a site root or a repository subpath, including GitHub Pages.
+## Project layout
 
 | Path                                             | Responsibility                                                           |
 | ------------------------------------------------ | ------------------------------------------------------------------------ |
@@ -95,5 +117,20 @@ Use `npm run format` to apply Prettier formatting. The build type-checks TypeScr
 | `src/profile.ts`, `src/backup.ts`, `src/fa-*.ts` | Run records, portable saves, and Persian translations.                   |
 | `public/`, `docs/images/`                        | Runtime artwork and fonts, and README previews.                          |
 | `tests/`                                         | Regression tests.                                                        |
+
+## Development
+
+```sh
+npm run format:check
+npm test
+npm run build
+npm run preview
+```
+
+Use `npm run format` to apply Prettier formatting. The build type-checks TypeScript and writes the static game to `dist/`. Use `npm run preview` to check that build locally.
+
+## Deployment
+
+Serve the contents of `dist/` over HTTP. Asset paths support a site root or a repository subpath, including GitHub Pages.
 
 The bundled Noto Sans Arabic font license is included in [public/fonts](public/fonts/NotoSansArabic-LICENSE.txt).
